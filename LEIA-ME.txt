@@ -1,0 +1,884 @@
+SIMULADOR PNEUMATICO - COMO ABRIR
+
+1. Extraia TODO o conteudo do ZIP para uma pasta nova.
+2. Mantenha a pasta assets junto do index.html.
+3. Execute INICIAR_SIMULADOR.bat.
+4. O navegador abrira em http://127.0.0.1:8765/
+
+Mantenha a janela do PowerShell aberta durante o uso. Para encerrar, pressione Ctrl+C.
+Nao abra index.html diretamente com duplo clique: o navegador bloqueia a leitura dos GLB locais.
+
+LAYOUT DA CENA
+- O layout geral continua baseado no projeto v4 do simulador.
+- O painel central foi atualizado a partir do arquivo GLB enviado pelo usuario.
+- A transformacao global do painel foi aferida comparando 189 pecas correspondentes entre o GLB do usuario e o modelo interativo original; o erro maximo de correspondencia das transformacoes ficou abaixo de 0,000001 m.
+- A hierarquia original dos eixos de giro, botoes e lampadas do painel foi preservada, mantendo as interacoes.
+- A posicao do prensa-cabo do painel foi obtida diretamente do GLB e usada para alinhar a ligacao eletrica.
+- Os fios vermelho (+24 V) e azul (0 V) sao as malhas reais exportadas do GLB do usuario, nao uma rota aproximada reconstruida.
+- O arquivo assets/FiosEletricos.glb contem os dois fios e os dois prensa-cabos reais, exatamente nas transformacoes exportadas pelo Blender.
+- O simulador mantem os pulsos de corrente animados sobre os trajetos importados.
+- O compressor, lubrifil, solenoide, atuador, valvula borboleta, tanque e tubulacao continuam usando os modelos e a logica do projeto v4.
+
+OPERACAO
+- Ligue o compressor e ajuste o lubrifil. A pressao minima de trabalho do atuador permanece conforme a logica do v6.
+- Ligue a chave geral do painel; em seguida, acione o botao TANQUE / BOMBA para energizar a bobina do solenoide.
+- A chave geral, o botao, o solenoide, as mangueiras, o atuador e a valvula mantem a logica de funcionamento herdada do v6.
+- Use as vistas Vista geral, Valvula, Painel e Tanque para enquadrar as partes da cena.
+
+API
+- cena.compressor(true|false)
+- cena.regulador(bar)
+- cena.chaveGeral(true|false)
+- cena.botaoTanqueBomba(true|false)
+- cena.estado()
+
+ARQUIVO DE REFERENCIA
+- referencia_glb/painelreposicionado_fios_caidos.glb: cena completa exportada pelo usuario.
+- O arquivo assets/FiosEletricos.glb contem apenas as duas malhas de fios usadas no simulador.
+
+TANQUE DE AGUA (ATUALIZACAO)
+- Capacidade mantida em 6100 L.
+- Comprimento e largura reduzidos 12% (3,50 x 1,80 m -> 3,08 x 1,58 m); a altura do corpo passou de 1,05 m para 1,36 m para manter o mesmo volume.
+- Corpo e chapa superior pintados de amarelo; bocal de saida continua alinhado com a tubulacao.
+
+BOMBA, JOELHO E CARDAN (ATUALIZACAO)
+- assets/BombaSIDES.glb: bomba enviada pelo usuario (o piso de apresentacao do arquivo foi ocultado).
+- Saida da valvula -> trecho reto -> joelho 90 graus (raio 0,15 m) virando para o fundo da cena -> flange de succao da bomba.
+- Bomba em escala 0,20: o furo de succao coincide com o furo interno da tubulacao. Dados nominais: 5000 L/min a 15 bar.
+- Eixo da bomba ligado a uma PTO por cardan com duas cruzetas (configuracao em Z, garfos em fase, 12,7 graus por cruzeta):
+  a bomba gira com a mesma velocidade da PTO. O rotor, o eixo e o acoplamento do GLB giram junto.
+- A bomba e a PTO ficam a direita dos fios do painel no piso, sem cruzar com eles.
+- Acionamento por enquanto via API: cena.pto(true|false). O botao fisico sera adicionado depois.
+- Nova vista: Bomba.
+
+RECALQUE E SISTEMA DE MISTURA ADA (ATUALIZACAO)
+- Montado conforme a apostila de treinamento (Sistema de mistura de espuma ADA, paginas 13 e 14).
+- Da descarga da bomba sobe a tubulacao de recalque (transparente, com a agua subindo quando a bomba gira) ate o coletor do ADA.
+- (1) Boquilha de injecao (venturi) em paralelo: deriva do coletor e retorna descendo para a succao, entre o joelho e a bomba.
+- (2) Valvula do fluxometro no coletor, com a saida lateral de solucao pre-mistura (flange).
+- (5) Regulador de dosagem com alavanca no topo; do regulador o LGE desce ate a garganta do venturi.
+- (3) Valvula antirretorno entre a valvula de tres vias e o regulador.
+- (4) Valvula de tres vias com entrada de emulsificante (LGE) e linha de agua de lavagem vinda da succao.
+- Cores das linhas como no desenho do manual: agua de lavagem em azul, emulsificante em amarelo.
+- Nova vista: ADA.
+
+LINHA DE LGE COM SOLENOIDE 2 (ATUALIZACAO)
+- Tanque de LGE de 860 L (0,80 x 1,10 x 0,98 m) a direita do ADA, com visor de nivel que acompanha o consumo.
+- Linha de LGE: saida no fundo do tanque -> sobe -> valvula borboleta pneumatica (copia reduzida da valvula da linha de agua)
+  -> entrada de emulsificante da valvula de tres vias (4) do ADA.
+- Conexao pneumatica em T na saida do lubrifil: um ramal vai para o solenoide existente e outro sobe para o solenoide 2.
+- Solenoide 2 (copia do solenoide 5/2 existente) num painel de solenoides novo, logo acima do painel atual.
+  Mangueiras fixas como na ligacao original: saida A -> porta B (fecha), saida B -> porta A (abre).
+- Botao AGUA / LGE do painel (o botao giratorio que ja existia no modelo) energiza a bobina 2, somente com a chave geral ligada.
+  A bobina 2 nao tem fio desenhado. Lampadas LGE: laranja = valvula fechada, verde = aberta.
+- Com a bomba girando, agua escoando e a valvula de LGE aberta, o ADA aspira LGE (dosagem de 3 %, minimo do manual),
+  o nivel do tanque cai e a agua no recalque fica verde (solucao pre-mistura, como no desenho do manual).
+- API: cena.botaoLGE(true|false), cena.botaoManual2(true|false); cena.estado().lge
+- Novas vistas: LGE e Solenoides.
+
+VALVULA DE LGE CONFORME A FOTO (ATUALIZACAO)
+- A copia da valvula borboleta foi substituida pela valvula real da viatura: corpo flangeado em linha,
+  atuador pneumatico cilindrico vertical com duas conexoes na frente e alavanca com manopla preta no topo.
+- Porta de baixo "LGE" = abre; porta de cima "AGUA" = fecha. Ar na porta LGE sobe a haste, que levanta a ponta curta
+  da alavanca: a manopla desce (aberta). Ar na porta AGUA: a manopla sobe (fechada).
+- Mangueiras do solenoide 2 podem ser soltas (clique no plugue), arrastadas e reconectadas/invertidas, como as da valvula de agua.
+  Botoes: Desconectar LGE, Inverter LGE, Original LGE. Mangueira solta com ar sopra pela ponta.
+- Sem ar nas duas camaras do atuador (mangueiras soltas ou sistema sem ar) a manopla pode ser arrastada para abrir/fechar a mao;
+  com ar ela fica travada.
+- API: cena.manualAlavancaLGE(graus), cena.mangueiraLGE('A'|'B','A'|'B'|null)
+
+AJUSTES
+- Removidos os rotulos de identificacao do sistema ADA.
+- Novo botao de vista "Valvula LGE" (aproxima a camera da valvula de LGE e da alavanca). Botoes de vista em duas linhas.
+
+DOSADOR DE LGE (ATUALIZACAO)
+- A alavanca no topo do ADA (regulador de dosagem) agora define a porcentagem de LGE: 3 % ou 6 %.
+- Somente manual: clique na alavanca para alternar, ou arraste (ela encaixa na posicao mais proxima).
+  Setor graduado com as marcas 3 % e 6 % sob a ponta da alavanca.
+- O consumo do tanque de LGE usa a dosagem escolhida; cena.estado().lge.dosagem informa o valor.
+- Novo botao de vista "Dosador LGE".
+
+FLUXO DE LGE, MISTURA E VENTURI EM CORTE (ATUALIZACAO)
+- Removido o rotulo da valvula de LGE.
+- Os tubos de LGE dentro do ADA (entrada, antirretorno, regulador -> garganta) e o retorno do venturi agora sao transparentes.
+- O LGE (amarelo) anda do tanque, passa pela valvula pneumatica, entra na valvula de 3 vias, antirretorno, regulador
+  e desce ate a garganta do venturi, sempre que esta sendo aspirado.
+- Mistura: depois do venturi o liquido fica amarelado (rico em LGE); ele volta para a succao, e dali em diante
+  (succao apos o retorno, bomba e recalque) a agua muda de azul para verde (solucao pre-mistura), aos poucos.
+  Fechando a valvula de LGE a cor volta ao azul.
+- Modo corte: a boquilha de injecao (venturi) aparece cortada ao meio (faces de corte em vermelho). Com a bomba girando,
+  as particulas de agua aceleram na garganta estreita (cerca de 3 a 4 vezes), e as gotas de LGE sao puxadas pelo
+  orificio superior para dentro do jato, saindo misturadas para o retorno.
+
+PAINEL DA CABINE, ENGATE PTO E ACELERADOR (ATUALIZACAO)
+- Novo painel a esquerda do painel central, reproduzindo a foto: saida de ar, 4 interruptores basculantes
+  (motor/diagnostico, "0"/velocidade, EXT e ENGATE PTO "EG 1" com trava cinza), pisca-alerta, comando de farois e porta-objetos.
+- O interruptor ENGATE PTO (o da direita, com a trava cinza) engata a PTO: o cardan gira a bomba. Ao engatar a bomba
+  parte em marcha lenta com 3 bar, mostrados no manometro PRESSAO DA BOMBA do painel central. O LED do interruptor acende.
+- Botao ACELERADOR do painel central: arraste para cima/baixo ou use a roda do mouse (tambem ha um controle na barra lateral).
+  Curva conforme o manual (5000 L/min a 14 bar com 3000 rpm), pelas leis de semelhanca: p ~ rpm^2, Q ~ rpm.
+  Acelerador 0 % = 1389 rpm / 3 bar; 90 % = 3109 rpm / 15 bar; 100 % = 3300 rpm / 16,9 bar (faixa vermelha).
+- Manometro: faixa branca 0-10 bar, verde 10-15 bar (15 bar e o maximo da faixa verde), vermelha 15-25 bar.
+- A vazao de agua/LGE e a velocidade de giro do cardan acompanham a rotacao.
+- API: cena.pto(true|false), cena.acelerador(0..100); cena.estado().bomba traz rotacao_rpm e pressao_bar.
+- Nova vista: Cabine.
+
+REGULADOR DE PRESSAO (BYPASS) E EXPEDICAO (ATUALIZACAO)
+- Conforme o manual (p. 13): o regulador protege a bomba contra fechamentos bruscos das expedicoes e contra operacao
+  com expedicoes fechadas. Aqui ele desvia a agua do recalque de volta para a succao, antes da bomba.
+- Bypass: T no recalque (y = 0,33 m) -> regulador de pressao (corpo cinza, piloto vermelho, indicador amarelo que sobe
+  quando abre) -> retorno na succao entre o retorno do venturi e a bomba. Tubo transparente com particulas quando alivia.
+- Expedicao: valvula de esfera de 1/4 de volta (alavanca vermelha) na saida de solucao pre-mistura do ADA, com engate
+  de saida e jato. Clique na alavanca (ou botao) = manobra rapida; "Fechar devagar" = 4 s.
+- Logica: com a expedicao fechada o bypass abre (vazao minima); acima de 15 bar alivia e limita a pressao em 15 bar.
+  Fechar rapido com agua escoando gera golpe de ariete (pico proporcional a rapidez e a rotacao); com o regulador ativo
+  o pico e desviado para a succao.
+- Sem o regulador (desmarque "Regulador de pressao (bypass) ativo"): golpe vai para a faixa vermelha, acelerador alto passa
+  de 15 bar e, com a expedicao fechada, a agua na bomba aquece (lampada SOBREAQ. do painel acima de 60 graus C).
+- API: cena.expedicao(true|false, lento), cena.bypass(true|false).
+- Novas vistas: Bypass e Expedicao.
+
+CORRECAO
+- Mangueiras de alimentacao (T -> entrada P) dos dois solenoides agora chegam por baixo, na vertical, no bocal de entrada P
+  (que fica na face inferior do solenoide). Antes elas chegavam por cima e atravessavam o corpo do solenoide.
+
+CORRECAO (VALVULA TANQUE-BOMBA FECHANDO AO ENGATAR A PTO)
+- A pressao da bomba usava o mesmo nome interno (S.pB) da pressao de ar na porta B (fecha) do atuador da valvula
+  tanque-bomba. Ao engatar a PTO, os 3 bar da bomba eram lidos como ar na porta B e a valvula fechava.
+- A pressao da bomba agora e S.pBomba (manometro, painel lateral, bypass, golpe de ariete e cena.estado().bomba.pressao_bar).
+  S.pB voltou a ser somente a porta B do atuador.
+
+CANHAO DE TETO SIDES (ATUALIZACAO)
+- assets/CanhaoSides.glb (canhao enviado pelo usuario), escala 0,40, numa plataforma de teto acima da PTO, bocal para a frente (-z).
+- Tubulacao: expedicao da bomba -> segue para a frente -> valvula borboleta com atuador pneumatico (copia da valvula da
+  linha de agua, escala 0,80) -> curva para cima -> base do canhao. Tubos transparentes com a agua/solucao escoando.
+- A expedicao agora alimenta o canhao (comeca aberta). Saida efetiva = expedicao x valvula do canhao: o bypass e o golpe
+  de ariete passam a considerar tambem o fechamento da valvula do canhao.
+- Solenoide 3 no painel de solenoides superior (painel alargado), alimentado por um segundo T (T2) que tambem alimenta o solenoide 2.
+- Botao esquerdo do joystick do painel central (jato solido) liga/desliga o solenoide 3; so funciona com a chave geral ligada.
+  Lampadas CANHAO TETO: laranja = valvula fechada, verde = aberta.
+- Mangueiras do atuador do canhao podem ser soltas, arrastadas e invertidas; botao manual azul no solenoide 3;
+  sem ar nas camaras a alavanca da valvula do canhao pode ser arrastada a mao.
+- Jato: agua (fina) sem LGE; espuma (grossa, branca, com manto de espuma no chao) quando o LGE e injetado.
+  Alcance = 70 m x (pressao / 14,5 bar): ~70 m com 14-15 bar (acelerador no maximo com o canhao aberto da 14,9 bar).
+  A espuma alcanca cerca de 25 % menos. Chao amplo adicionado para ver o jato.
+- API: cena.botaoJoystick, cena.botaoManual3, cena.manualAlavancaCanhao, cena.mangueiraCanhao; cena.estado().canhao.
+- Novas vistas: Canhao, Valvula canhao e Jato.
+
+CHAO AO REDOR DO CENARIO
+- O chao em volta agora e asfalto cinza claro (granulado). Botoes "Chao: asfalto" / "Chao: grama" na barra lateral trocam o piso.
+- API: cena.chao('asfalto'|'grama').
+
+JATO DO CANHAO MAIS CONCENTRADO
+- O jato sai exatamente da boca do bocal (centro em x = 1,435 / y = 0,744 do modelo) e segue o eixo real do bocal,
+  medido no GLB (8,9 graus acima da horizontal).
+- Sai com o diametro do bocal (~6,6 cm) e abre em cone: agua com meio-angulo de 1,3 graus (cerca de 3 m de largura a 70 m),
+  espuma com 3,5 graus. As gotas comecam pequenas e crescem com a distancia (particulas com tamanho proprio e borda suave).
+
+VAZAO DO CANHAO (CORRECAO)
+- Vazao nominal do canhao de 3000 L/min (manual p. 3) a 14,5 bar. Fora disso Q = 3000 x raiz(p / 14,5), reduzida pela abertura
+  da expedicao e da valvula do canhao, e limitada ao que a bomba entrega na rotacao atual.
+  Ex.: marcha lenta ~1280 L/min; acelerador no maximo (14,9 bar) ~3040 L/min.
+- O consumo de LGE passou a ser proporcional a vazao que sai pelo canhao (dosagem 3 % ou 6 %): a 3000 L/min e 3 %, 90 L/min,
+  o tanque de 860 L dura cerca de 9,5 min (a 6 %, cerca de 4,7 min). Com o canhao fechado nao ha consumo nem injecao de LGE.
+
+JUNTA DE EXPANSAO DE BORRACHA (ATUALIZACAO)
+- Na linha do canhao, entre a expedicao e a valvula do canhao: fole de borracha preta com dupla onda entre dois pares de
+  flanges aparafusados, como na foto.
+- Limite de 15 bar. Com a expedicao aberta, se a pressao da bomba passar de 15 bar a junta ROMPE: o fole aparece rasgado,
+  sai um grande vazamento em todas as direcoes e forma uma poca no chao. A bomba despeja pela fenda (pressao cai) e a agua
+  deixa de chegar ao canhao (e a qualquer outra expedicao alimentada por esta linha).
+- Com o regulador de pressao (bypass) ativo a pressao fica limitada a 15 bar e a junta nao rompe. Para ver o rompimento,
+  desmarque o regulador e acelere com o canhao fechado, ou feche o canhao de repente com o acelerador alto.
+- Botao "Trocar junta de expansao" (ou cena.trocarJunta()) instala uma junta nova. Nova vista: Junta.
+
+TELINHA LATERAL (PICTURE-IN-PICTURE)
+- Na barra lateral, "Telinha lateral" escolhe uma vista para ficar sempre visivel no canto inferior direito, junto com a
+  cena principal: Paineis (central + cabine), Painel central, Painel da cabine, Solenoides, valvulas, canhao, jato, junta,
+  bomba, ADA, dosador, bypass, expedicao, tanques ou vista geral. A propria telinha tem o seletor, - / + (tamanho) e x (fechar).
+- Tudo que aparece na telinha pode ser acionado por ela: chave geral, botoes TANQUE/BOMBA e AGUA/LGE, joystick,
+  ENGATE PTO, acelerador (arraste ou roda), alavancas, plugues de mangueira, botoes azuis etc.
+- Arraste no vazio da telinha para girar so a camera dela; roda do mouse aproxima/afasta. A camera principal continua livre.
+- API: cena.telinha('paineis') abre; cena.telinha(null) fecha.
+
+CANHAO DE PARA-CHOQUE (ATUALIZACAO)
+- Manual p. 24 (monitor de para-choque Akron 3465): producao 950 L/min, alcance do jato direto 50 m, jato spray 20 m
+  (largura 15 m), azimute 2 x 90 graus, elevacao +45 / -20 graus. (A p. 3 cita "950 galoes por minuto"; foi usada a tabela tecnica.)
+- Modelado como na foto: corpo preto com giro, cabeca, caixa do motor e bico com nervuras; cotovelo de aluminio com acoplamento
+  vermelho; mangueiras trancadas; caixa preta do para-choque. Fica abaixo e a frente do canhao de teto.
+- Linha de bitola menor (r = 26 mm) sai por baixo da tubulacao do canhao de teto, depois da junta de expansao e antes da valvula
+  do teto, desce, passa por cima da PTO, atravessa a valvula borboleta com atuador pneumatico (copia em escala 0,45) e entra no canhao.
+- Solenoide 4 no painel de solenoides superior (ampliado para 4 solenoides), alimentado por um terceiro T (T3).
+- Botao CANHAO PARACHOQUE do painel central (com chave geral ligada) aciona o solenoide 4; lampadas CANHAO PARACHOQUE:
+  laranja = fechada, verde = aberta. Botao azul manual, mangueiras soltaveis/inversiveis e alavanca manual sem ar, como nos outros.
+- Vazao: 950 L/min x raiz(p / 14,5 bar) x abertura; alcance 50 m x (p / 14,5). Os dois canhoes repartem a vazao da bomba;
+  o LGE e dosado pela soma das vazoes. Junta rompida: nenhum dos dois recebe agua.
+- API: cena.botaoCanhaoParachoque, cena.botaoManual4, cena.manualAlavancaParachoque, cena.mangueiraParachoque; cena.estado().parachoque.
+- Novas vistas: Para-choque e Valvula para-choque (tambem na telinha lateral).
+
+PAINEL DO CANHAO DE PARA-CHOQUE (CORRECAO DO ACIONAMENTO)
+- O canhao de para-choque tem painel proprio, como na foto: caixa preta com joystick (tampa cinza sextavada no topo), botao SPEED
+  (LENTO/RAPIDO), botao de OSCILACAO, alavanca LIGA/DESLIGA sob protecao vermelha, chave pequena e luz indicadora.
+  Fica num pedestal a esquerda do painel da cabine.
+- A alavanca sob a protecao vermelha energiza o painel (a protecao levanta, a alavanca vai para LIGA e a luz acende).
+- Com o painel energizado, o botao no topo do joystick liga/desliga o canhao (solenoide 4 -> valvula do para-choque).
+  Desenergizar o painel desliga o canhao. Nao depende da chave geral do painel central.
+- O botao "CANHAO PARACHOQUE" do painel central volta a ser decorativo; as lampadas CANHAO PARACHOQUE continuam mostrando a valvula.
+- API: cena.energizaPainelParachoque(true|false), cena.botaoCanhaoParachoque(true|false). Nova vista: Painel para-choque.
+- Posicao corrigida: o painel do para-choque fica encostado na frente da base do painel central, logo antes do joystick do
+  canhao de teto, com o tampo nivelado com a base (preso por dois suportes e apoiado em quatro pes no piso).
+
+REMOCAO DA VALVULA MANUAL DA EXPEDICAO
+- A valvula de esfera com alavanca vermelha na saida de solucao pre-mistura do ADA foi removida (nao existe na viatura).
+  A saida do ADA agora segue direto, por um tubo transparente, para a linha dos canhoes.
+- Sairam tambem os botoes "Expedicao"/"Fechar devagar", a leitura "Expedicao", a vista "Expedicao" e cena.expedicao().
+- O bypass e o golpe de ariete passam a depender apenas das valvulas pneumaticas dos canhoes (teto e para-choque).
+
+MODO CORTE: ORIFICIO DE ENTRADA DO VENTURI
+- No modo corte a camara inferior do coletor do ADA tambem aparece cortada ao meio (paredes internas visiveis, faces de corte
+  em vermelho). Na parede voltada para o venturi aparece o FURO de entrada (diametro do ramal), com a borda destacada.
+- As particulas de agua vem do recalque por baixo, sobem dentro do coletor, passam pelo furo, entram no ramal e aceleram na
+  garganta do venturi, onde o LGE e aspirado.
+- Correcao: no modo corte, a boquilha (venturi) cortada agora tem o ORIFICIO aberto na garganta (diametro ~19 mm), alinhado com o
+  tubo que desce do regulador de dosagem do ADA. A casca e a face de corte de cima sao interrompidas no furo, e o tubo do orificio
+  aparece cortado (paredes em vermelho). Com LGE sendo aspirado, as gotas amarelas descem do ADA, passam pelo furo e entram no jato.
+- Ajuste pedido: no modo corte o coletor do ADA fica INTEIRO (nao e mais cortado ao meio). Apenas a parede onde o ramal do
+  venturi encosta ganha um furo (diametro do ramal), por onde se ve a agua saindo do ADA para o venturi atraves do ramal cortado.
+
+LGE ASPIRADO COM AS EXPEDICOES FECHADAS
+- O venturi (boquilha de injecao) fica em paralelo entre descarga e succao: com a bomba girando e agua no tanque ele sempre
+  circula agua. Com a valvula de LGE aberta, o LGE e aspirado mesmo sem nenhum canhao aberto, e a solucao recircula.
+- Vazao de referencia do laco do venturi: 400 L/min a 14,5 bar (Q ~ raiz(p)). O consumo de LGE usa a maior entre essa vazao e a
+  que sai pelos canhoes/vazamento: em marcha lenta, a 3 %, ~5,5 L/min com tudo fechado; com canhoes abertos, segue a vazao deles.
+
+CANHAO DE PARA-CHOQUE: VAZAO E ALCANCE FIXOS NO MAXIMO
+- Vazao limitada a 950 L/min e alcance a 50 m (manual p. 24), atingidos a partir de 14,5 bar. Abaixo disso caem com a pressao
+  (Q ~ raiz(p), alcance ~ p). Com a valvula parcialmente aberta, ambos diminuem.
+- Correcao: 3000 L/min / 70 m (teto) e 950 L/min / 50 m (para-choque) NAO sao limites, sao as vazoes e alcances na pressao maxima
+  de trabalho (14,5 bar). Acima dela a vazao e o alcance continuam aumentando, mas a junta de expansao rompe acima de 15 bar
+  (sem o regulador de pressao ativo).
+
+REGULADOR DE PRESSAO SEM LIMITE DE 15 BAR (CORRECAO)
+- O regulador nao limita mais a pressao. Ele protege a bomba girando com as expedicoes (canhoes) fechadas: recircula agua do
+  recalque para a succao (vazao minima, sem aquecimento) e amortece o golpe de aríete de fechamentos bruscos.
+- Acelerando com os canhoes fechados a pressao segue a curva da bomba (recirculacao reduz so ~8 %): acima de ~97 % de acelerador
+  passa de 15 bar e a junta de expansao rompe, mesmo com o regulador ativo.
+
+SUCCAO DE MANANCIAL EXTERNO (4") E BOMBA DE ESCORVA
+- Conforme o manual: 2 mangotes plasticos de 4" (101,6 mm) x 3 m com engates rosqueaveis, ralo de succao com valvula de retencao,
+  bomba de escorva AAP 27-9 (2800 W, 24 V CC, 2700 rpm, altura maxima 6 m.c.a.), acionamento manual ou automatico,
+  termino quando sai agua no exaustor e ha pressao na descarga, limites de 90 s de acionamento e 20 s com agua.
+- Linha de 4": T no trecho entre a valvula tanque-bomba e o joelho -> valvula esferica manual (alavanca vermelha, clique para
+  abrir/fechar) -> terminal rosqueado -> mangote (2 lances, translucido com espiral) -> ralo dentro do manancial.
+- Manancial: poco aberto no chao a frente do lado direito, com a agua 1,34 m abaixo do eixo da bomba (altura de succao ate a
+  escorva: 1,40 m). O chao ganhou a abertura do poco.
+- Bomba de escorva presa no topo da tubulacao de succao, acima do nivel da bomba, entre a valvula tanque-bomba e a bomba;
+  ventoinha gira quando ligada; exaustor solta agua quando a linha esta escorvada.
+- Botao ESCORVA do painel central (exige chave geral): acionamento manual. "Escorva automatica": liga com a bomba girando e
+  pressao < 2 bar sem agua chegando (e a esferica aberta) e desliga quando a agua chega e ha pressao.
+- Vacuometro do painel (0 a 10 m.c.a.): escorvando mostra a coluna sustentada; succionando do manancial, altura + perdas
+  (~3,6 m.c.a. a 3000 L/min); succionando do tanque, ~0.
+- A bomba so gera pressao com agua: abrir a esferica com o mangote cheio de ar e a bomba girando faz a bomba puxar ar e perder a
+  escorva (pressao cai a zero). O tanque aberto tambem enche o mangote por gravidade. A retencao do ralo mantem o mangote cheio.
+- Vazao do manancial alimenta a bomba normalmente (canhoes, ADA, LGE etc.).
+- API: cena.valvulaSuccao(true|false), cena.escorva(true|false), cena.escorvaAutomatica(true|false); cena.estado().succao.
+- Novas vistas: Succao, Manancial e Escorva (tambem na telinha lateral).
+
+RETORNO BOMBA -> TANQUE (VALVULA BOMBA-TANQUE) E SOLENOIDE 5
+- Tubulacao ligada a tubulacao da expedicao da bomba por um T (antes da junta de expansao), que sobe acima dos paineis de
+  solenoides (y = 1,30 m) e segue ate o topo do tanque de agua. Antes do tanque: valvula borboleta com atuador pneumatico
+  "bomba-tanque" (copia da valvula da linha de agua, escala 0,80). Tubos transparentes com a agua/solucao escoando.
+- Solenoide 5 no painel de solenoides superior (ampliado para 5), alimentado por um quarto T (T4).
+- Novo botao BOMBA / TANQUE no painel central (copia do botao TANQUE / BOMBA, logo acima dele, com lampadas laranja/verde):
+  com a chave geral ligada, liga/desliga o solenoide 5 e abre/fecha a valvula bomba-tanque.
+- Mangueiras do atuador soltaveis/inversiveis, botao azul manual no solenoide 5 e alavanca manual sem ar, como nas outras.
+- Vazao de referencia: 1500 L/min a 14,5 bar (Q ~ raiz(p)); entra na reparticao da vazao da bomba, na dosagem do LGE e na
+  pressao (a recirculacao alivia o bypass). Util para abastecer o tanque a partir do manancial (o nivel do tanque nao e simulado).
+- API: cena.botaoBombaTanque, cena.botaoManual5, cena.manualAlavancaBombaTanque, cena.mangueiraBombaTanque; cena.estado().bombaTanque.
+- Nova vista: Bomba-tanque (tambem na telinha lateral).
+- Painel de solenoides superior movido para a esquerda: mesma largura (1,42 m) e alinhado com o painel de baixo
+  (x -1,19 a 0,23). Os quatro solenoides, os T e as mangueiras acompanharam.
+
+PAINEIS DE COMANDO REPOSICIONADOS
+- Painel central, painel da cabine e painel do para-choque deslocados 1,26 m para a esquerda (a esquerda do mangote de succao),
+  alinhados com o compressor e com os paineis de solenoides. Ajuste em PAINEIS_DX / PAINEIS_DZ no index.html.
+- Os fios eletricos (vermelho 24 V e azul 0 V) foram refeitos: saem da bobina pelo trajeto original, contornam o painel de
+  solenoides pela direita, passam pelo piso por baixo da tubulacao principal e chegam ao prensa-cabo do painel no novo lugar.
+- As vistas Painel, Cabine, Painel para-choque e a opcao Paineis da telinha acompanham o novo local.
+
+VACUOMETRO DA BOMBA (painel central, ao lado do manometro)
+- Mede o vacuo na admissao da bomba, escala 0 a 10 m.c.a. (0 a -1 bar). O manual so indica a posicao do instrumento e
+  a capacidade da escorva (6 m de coluna d'agua); o comportamento abaixo segue o funcionamento usual da succao.
+- Tanque aberto: agua por gravidade, ponteiro no zero.
+- Escorva com tanque e esferica fechados: o ponteiro sobe ate cerca de 6 m.c.a. (teste mensal de succao maxima do manual)
+  e o vacuo se mantem, caindo devagar, depois que a escorva para.
+- Escorva com a esferica aberta: o ponteiro acompanha a coluna de agua que sobe no mangote.
+- Succao do manancial com a bomba trabalhando: altura de succao + perdas no mangote, sobe com a vazao.
+- Bomba cheia girando com a admissao fechada ou estrangulada: o vacuo sobe com a rotacao; acima de 6,5 m.c.a. a leitura
+  do painel lateral indica CAVITACAO.
+
+ESCORVA: LIMITE DE 30 s E SINAL SONORO (apostila de treinamento pratico, "Sistema de succao")
+- A escorva funciona no maximo 30 s. Enquanto ela trabalha soa o sinal sonoro "pi pi pi"; ele desliga sozinho quando a
+  bomba e inundada e a escorva termina.
+- Se passar de 30 s, a escorva e cortada e o alarme continua (bipes mais rapidos) ate o operador desligar o PTO (e o botao
+  manual). Entao verificar todas as valvulas, pois ha entrada de ar em algum ponto, e repetir o procedimento.
+- O som (Web Audio) so comeca depois do primeiro clique ou tecla na pagina (regra dos navegadores). Ha uma caixa
+  "Sinal sonoro da escorva" no painel lateral para silenciar.
+
+ANIMACAO DA AGUA NAS TUBULACOES
+- A agua so anda na linha do tanque, na admissao da bomba e no mangote quando a bomba realmente puxa agua: canhoes abertos,
+  retorno bomba-tanque aberto ou junta rompida. PTO desligado = agua parada (a linha continua cheia).
+- Com o PTO ligado e tudo fechado a agua da admissao tambem fica parada (a bomba so recircula pelo bypass); no tubo que sobe
+  para o ADA ainda ha movimento pelo laco do venturi.
+- A velocidade das particulas acompanha a vazao (L/min) e a parte que vem do tanque ou do manancial.
+
+RALO REMOVIVEL, NIVEL DO TANQUE E DRENO POR GRAVIDADE
+- O ralo (com a valvula de retencao) da ponta do mangote pode ser removido/recolocado clicando nele no 3D ou no botao
+  "Ralo do mangote" (secao 10).
+- Sem o ralo, com a valvula esferica e a valvula tanque-bomba abertas, o tanque esvazia por gravidade para o manancial:
+  vazao ~1500 L/min com o tanque cheio (carga de ~2,3 m entre o nivel do tanque e a superficie do manancial), diminuindo
+  conforme o nivel baixa. As particulas descem pelo mangote e a vazao aparece em "Dreno por gravidade".
+- Sem o ralo, a coluna de agua do mangote nao se sustenta quando a escorva/bomba para: a agua volta ao manancial e a
+  linha perde a escorva.
+- O tanque de agua agora tem nivel (6100 L): baixa com o que a bomba puxa do tanque e com o dreno, sobe com o retorno
+  bomba-tanque. A agua dentro do tanque transparente acompanha o nivel, e o indicador de nivel de agua do painel central
+  (e o de LGE) passaram a funcionar. Tanque vazio com a valvula aberta: entra ar e a bomba perde a agua.
+- Botao "Reabastecer tanque" volta a 6100 L. API: cena.ralo(true|false), cena.reabastecerTanque(), cena.nivelTanque().
+
+MARCADORES DE NIVEL COM 5 LEDs (painel central)
+- Duas colunas de 5 LEDs (AGUA e LGE) na faixa central da placa inclinada, entre as lampadas. LED de baixo vermelho,
+  o segundo ambar, os tres de cima verdes. Cada LED vale 20 % do tanque.
+- Tanque cheio: 5 acesos. Quando o nivel cai para a metade de baixo da faixa de um LED (entre ele e o anterior), ele pisca;
+  abaixo da faixa, apaga. Ex.: 85 % = 4 acesos + o 5o piscando; 79 % = 4 acesos. Abaixo de 10 % so o vermelho pisca.
+- Os LEDs so funcionam com o painel energizado (chave geral ligada).
+
+ANIMACAO DE AGUA EM TODOS OS DUTOS TRANSPARENTES (no sentido do escoamento)
+- Linha tanque -> bomba dividida no T da succao: o trecho valvula tanque-bomba -> T anda com a agua que sai do tanque
+  (bomba + dreno); o trecho T -> bomba anda so com o que a bomba puxa. No dreno por gravidade a agua vira no T e desce
+  pelo ramal e pelo mangote ate o manancial; succionando so do manancial, o trecho do tanque fica parado.
+- Escorva com a esferica aberta: a agua aparece subindo pelo mangote apenas no trecho ja cheio (acompanha a coluna);
+  escorvada, segue ate o T e o exaustor enquanto a escorva roda.
+- Novo: trecho transparente da expedicao (saida do ADA -> linha dos canhoes) anima com a vazao de teto + para-choque +
+  retorno ao tanque.
+- Os demais dutos (linha do tanque, succao, recalque, canhao de teto, para-choque, bomba-tanque, bypass, LGE, venturi)
+  continuam animando no sentido do escoamento e param quando nao ha vazao.
+
+PRIORIDADE DO TANQUE SOBRE O MANANCIAL
+- Com a valvula tanque-bomba aberta e a esferica aberta, a bomba puxa do tanque (carga positiva por gravidade); a
+  retencao do ralo fica fechada e o manancial nao fornece agua (mangote parado, vacuometro ~0, nivel do tanque baixando).
+  O painel lateral avisa: "manancial sem vazao ... feche a tanque-bomba para succionar".
+- So se a tanque-bomba estiver quase fechada (linha do tanque estrangulada, ~6000 L/min x abertura) o manancial completa
+  o que falta. Para succionar do manancial: feche a tanque-bomba, como manda a apostila.
+
+
+SETAS DE FLUXO (o tour guiado foi removido)
+- Setas animadas dentro de todos os dutos transparentes, no sentido do escoamento, so quando ha fluxo; a velocidade
+  acompanha a vazao. Cores: azul = agua, amarela = LGE, verde = mistura (agua + LGE).
+- Trechos: tanque -> valvula -> T da succao; T -> bomba; mangote/ramal (sobe na succao e na escorva, desce no dreno);
+  retorno do venturi e bypass -> bomba; recalque ao ADA; linha de LGE; expedicao; canhao de teto; para-choque; bomba-tanque.
+- A linha de succao apos o retorno do venturi e a descarga ficam verdes quando o LGE esta sendo dosado.
+- Caixa "Setas de fluxo" no topo do menu lateral liga/desliga, com a legenda das cores.
+- Correcao: no three.js r128 o CurvePath.getPointAt ignora o vetor de destino; setas e particulas que usam caminhos
+  compostos (canhao, para-choque, bomba-tanque, bypass, LGE, mangote, retorno do venturi) agora usam o ponto retornado
+  e se distribuem ao longo dos dutos em vez de ficarem num ponto so.
+
+CONTAMINACAO DO TANQUE DE AGUA COM LGE
+- No ADA (boquilha em paralelo entre descarga e succao, manual pag. 14) a mistura e feita na propria bomba: com o LGE
+  aberto toda a descarga e pre-mistura. Abrindo a bomba-tanque nesse momento, vai espuma para o tanque de agua.
+- O tanque acumula o LGE recebido (concentracao = LGE / agua no tanque). Acima de 0,03 % ele fica CONTAMINADO: a agua
+  do tanque fica esverdeada, as setas da linha do tanque ficam verdes e a succao pelo tanque leva LGE para a descarga
+  mesmo com a valvula de LGE fechada (sai espuma nos canhoes).
+- A contaminacao so sai esvaziando o tanque por completo (canhoes ou dreno sem ralo) e reabastecendo com agua pura.
+  O botao "Reabastecer tanque" recusa com o tanque contaminado e ainda com agua, e avisa no painel lateral.
+
+EXPEDICOES LATERAIS 2 1/2" COM MANGUEIRAS STORZ (secao 12)
+- T na linha do canhao de para-choque, antes da valvula dele (z = -1,45). Dois ramais transparentes, um para cada lado
+  (direita = +x, esquerda = -x, com a frente do caminhao em -z), cada um com valvula esferica de alavanca manual
+  (clique na alavanca: atravessada = fechada, alinhada com o tubo = aberta) e engate storz.
+- No chao, ao lado de cada engate, um rolo de mangueira de 15 m com storz nas pontas. Clique no rolo (ou botao
+  "Arremessar"): o rolo e lancado e corre pelo chao desenrolando a linha; em seguida a ponta de tras sobe e engata na
+  expedicao. A ponta livre (storz) pode ser arrastada pelo chao; a mangueira mantem 15 m (sobra faz curva) e nao estica
+  alem disso. Botao "Recolher" enrola de novo.
+- Valvula aberta com a bomba pressurizada: agua (ou espuma, com LGE) sai pela ponta livre e a mangueira "enche";
+  sem mangueira conectada a agua jorra pelo engate. Vazao de referencia (estimativa, os manuais nao trazem):
+  900 L/min por expedicao a 14,5 bar, Q ~ raiz(p), repartida com os canhoes conforme a capacidade da bomba.
+  Junta de expansao rompida corta tambem estas expedicoes (ficam depois dela).
+- Clicar de novo na expedicao (engate storz) com a mangueira estendida faz ela voltar a posicao enrolada (so daquele lado).
+
+DISPERSADOR (secao 13) - solenoide 6 + valvula borboleta pneumatica
+- Manual p. 36 / apostila p. 17: dispersadores sob a frente do caminhao, com a pressao da bomba, contra fogo rasteiro;
+  valvula comandada remotamente; chave DISPERSADOR no painel principal; 57 L/min. Criado um dispersador (bico leque).
+- Linha: T por baixo da linha do para-choque (z -1,78, depois da PTO e antes da valvula do para-choque) -> desce ate
+  y 0,06 -> valvula borboleta com atuador pneumatico (z -2,02) -> segue para a frente por baixo da caixa do para-choque
+  -> bico leque em z -2,55, jogando um leque de ~120 graus para a frente e para o chao (poca molhada a frente).
+- Solenoide 6 no painel superior (ao lado do 5), alimentado por um quinto T (T4 -> T5 -> solenoides 5 e 6). Mesmas
+  funcoes dos outros: botao manual azul, mangueiras A/B destacaveis/inversiveis (arraste os plugues), alavanca manual
+  quando nao ha ar no atuador, sopro nos escapes.
+- A chave DISPERSADOR do painel central (que ja existia no modelo) agora funciona: precisa da chave geral; lampadas
+  DISPERSADOR laranja (fechada) / verde (aberta). Botao tambem no menu lateral.
+- Vazao: 57 L/min a 14,5 bar (Q ~ raiz(p)), entra na conta da bomba; espuma quando o LGE esta dosando. Fica depois da
+  junta de expansao (junta rompida corta o dispersador).
+- Vistas: "Valvula dispersador" e "Dispersador".
+
+ADMISSAO DO TANQUE E HIDRANTE (secao 14)
+- Conexao de admissao/expulsao por gravidade ligada ao tanque (manual p. 35/36): na face lateral do tanque (lado -x,
+  perto do fundo, z 0,90) tubo curto transparente -> valvula esferica de alavanca manual -> engate storz.
+- Rolo de mangueira de 15 m no chao (mesmo modelo das expedicoes laterais). Clique no rolo (ou "Arremessar"): o rolo
+  e lancado em direcao ao hidrante desenrolando a linha; depois uma ponta engata na admissao e a outra no storz do
+  hidrante. Clique no engate da admissao (ou "Recolher") para a mangueira voltar enrolada.
+- Hidrante de coluna vermelho a ~2 m da admissao (x -5,3, z 1,85), com saida storz voltada para o caminhao; clique no registro do topo
+  para abrir/fechar (comeca aberto).
+- Mangueira ligada + hidrante aberto + valvula da admissao aberta: o tanque enche por pressao (1500 L/min de referencia,
+  estimativa) ate 6100 L; a mangueira fica cheia e as setas mostram a agua entrando no tanque.
+- Valvula da admissao aberta SEM mangueira: o tanque esvazia por gravidade pelo engate (~650 L/min com o tanque cheio,
+  caindo com o nivel). Serve tambem para esvaziar o tanque contaminado com LGE.
+- Vistas: "Admissao do tanque" e "Hidrante".
+
+TRANSBORDO PELA TAMPA SUPERIOR
+- O enchimento nao para sozinho em 6100 L. Com o tanque cheio e entrada maior que a saida (hidrante pela admissao ou
+  retorno bomba-tanque), o excesso transborda pela boca de inspecao (tampa) no topo: a agua borbulha na tampa, escorre
+  pela chapa superior, desce pelas laterais e forma uma poca no chao em volta do tanque.
+- Vazao do transbordo = entrada liquida; aparece em "Transbordo (tampa)" no painel lateral. O operador deve acompanhar o
+  nivel no painel central (ponteiro e LEDs) e fechar a valvula da admissao / hidrante / bomba-tanque na hora certa.
+- Se o tanque estiver contaminado, o transbordo sai esverdeado e leva LGE junto.
+
+CAMINHAO COMPLETO E "EXPLODIR SUPERESTRUTURA"
+- O simulador abre com o caminhao CCI 4x4 montado (modelo procedural baseado na foto da capa do manual: cabine
+  avancada amarela com faixa vermelha, giroflex, para-choque com canhao, superestrutura amarela com portas de enrolar
+  de aluminio, faixa vermelha, corrimao e escada no teto, escada traseira, canhao de teto sobre a frente da carroceria).
+  Sem logotipos de fabricante.
+- Botao "Explodir superestrutura" (topo do menu lateral): as laterais, o teto, a frente, a traseira, a cabine, os
+  canhoes, as rodas e o chassi se afastam girando e somem, enquanto todo o sistema (que estava reduzido a 30 % dentro da
+  carroceria) cresce ate o tamanho e a posicao reais da cena; a camera acompanha (~4,6 s). O mesmo botao ("Montar
+  caminhao") faz o caminho inverso.
+- Enquanto o caminhao esta montado ou em transicao, os cliques no sistema ficam desativados.
+- Implementacao: todo o conteudo da cena (exceto chao e luzes) e agrupado em "Sistema_CCI" depois do carregamento;
+  ajuste do encaixe em CAMI.s / CAMI.Csys / CAMI.Cbody; pecas do caminhao e direcoes da explosao em CAMI.pecas.
+
+MODELO DO CAMINHAO (assets/CaminhaoTriel.glb)
+- O caminhao procedural foi substituido pelo modelo GLB fornecido (Triel-HT sobre Scania P420 CB 4x4), girado para a
+  frente ficar em -z. Conferencia com a apostila (p. 2, "Dimensoes gerais"):
+    comprimento 8,95 m ......... modelo 8,92 m
+    largura sem espelhos 2,50 m  carroceria 2,50 m
+    entre-eixos 4,50 m ......... modelo 4,50 m
+    altura vazio 4,02 m ........ modelo 4,47 m com o cano do canhao de teto erguido -> o cano (com bocal, aletas e
+                                 textos) foi baixado 28 graus para a posicao de transporte: altura ~4,02 m.
+- O chao, a faixa da pista e o alvo de camera que vinham no arquivo nao sao usados (a cena tem o seu chao).
+- Explosao: as malhas sao separadas automaticamente por nome/posicao em cabine, laterais, teto, traseira, miolo,
+  canhao de teto, canhao de para-choque, rodas (por lado) e chassi, cada grupo com sua direcao de saida.
+
+
+CASA DE BOMBAS DEMONSTRATIVA (caminhao montado)
+- Com o caminhao montado, o compartimento traseiro aberto mostra um modelo apenas visual da casa de bombas, em tamanho
+  real e ocupando o compartimento (~1,14 x 1,37 x 1,19 m), inspirado nas fotos do caminhao: bomba com voluta aletada
+  embaixo a esquerda; curva grande de succao em inox passando por baixo e subindo pela direita em curva de borracha
+  preta ate o flange; conjunto vertical com atuador de diafragma sobre a bomba; T e tubo vertical de inox com rosca
+  azul; valvula redonda com parafusos e alavanca; tubos diagonais com flange; curva de inox com luva de latao e
+  mangueira azul reforcada no alto; lubrificador (FRL) embaixo a esquerda; mangueiras pretas; tubos azuis de ar;
+  tampa vermelha da escorva; cinta cinza; calco amarelo; revestimento cinza pontilhado nas paredes.
+- Nada funciona nesse modelo. Ao explodir, ele sai pela abertura traseira e some junto com as pecas do caminhao,
+  enquanto o sistema real (que funciona) aparece e cresce ate a cena.
+- Codigo: CAMI.montaDemo (posicoes relativas ao compartimento: u esquerda->direita, v piso->teto, w abertura->fundo).
+
+CHAO
+- Removida a opcao de chao de asfalto: o chao e sempre grama, agora num verde mais escuro (base #4a7230).
+
+MOTOR
+- O botao "Compressor" virou "Motor": o compressor de ar e acionado pelo motor do caminhao; com o motor ligado o
+  compressor enche o reservatorio (ate 8 bar). O motor nao foi modelado.
+
+INUNDADOR DE PARA-BRISA (secao 15)
+- Apostila p. 17 / manual p. 41: retira agua do tanque e envia para um equipamento em cima da cabine que inunda o
+  para-brisa (limpeza e resfriamento da cabine durante a operacao).
+- Bomba eletrica pequena (motor 24 V azul com aletas, ventoinha, cabeca da bomba, caixa de ligacao e LED) presa ao lado
+  do tanque de agua, com tomada na face do tanque perto do fundo.
+- Acionamento: chave INUND. PARABRISA do painel principal (ja existia no modelo, agora funciona; precisa da chave
+  geral). Lampadas INUND.: laranja parada, verde bombeando. Botao tambem no menu lateral.
+- Para-brisa criado a frente da cena (vidro inclinado com moldura amarela sobre suporte), com barra de 7 bicos no topo (1,30 x 0,70 m, alinhado com o tanque de agua).
+  Com a bomba ligada a agua sai dos bicos, escorre por toda a face externa do vidro (pelicula animada + gotas) e pinga
+  da borda de baixo. Consome agua do tanque (40 L/min de referencia, estimativa); para quando o tanque esvazia; com o
+  tanque contaminado a agua sai esverdeada.
+- Vistas: "Para-brisa" e "Bomba do inundador".
+- Tanque contaminado com LGE: o inundador joga espuma branca no para-brisa. A espuma se acumula de cima para baixo e
+  em ~4 s cobre todo o vidro, tapando a visao; com a bomba parada ela continua ali (some devagar) e so e lavada com
+  agua limpa (tanque esvaziado e reabastecido). O painel lateral avisa "ESPUMA ... tapando a visao".
+- Limpadores de para-brisa (2 bracos paralelos com palheta): funcionam automaticamente quando o inundador e ligado
+  (vai-e-volta ~1,6 s); ao desligar terminam o curso e estacionam deitados na borda de baixo.
+
+CARRETEL DE MANGOTINHO (secao 16) - lado esquerdo
+- Pre-conectado por um T na linha do para-choque (z -1,62, antes da valvula dele); registro esferico de latao com
+  alavanca no lado esquerdo do carretel, colado ao corpo ("manter sempre fechada, abrir somente quando for utilizar o
+  carretel"), logo antes da junta rotativa no
+  cubo do carretel. Carretel: tambor com discos pretos, mangueira clara de 1" x 30 m enrolada (a camada diminui conforme
+  a mangueira sai), guia de roletes de aluminio no lado de fora, caixa de aluminio, chave de recolhimento eletrico.
+- Arraste o esguicho pelo chao para desenrolar (max. 30 m; o tambor gira). Clique no esguicho (sem arrastar) para
+  regular a vazao: fechado / 30 / 60 / 95 / 125 GPM = 113,6 / 227,1 / 359,6 / 473,2 L/min (1 galao = 3,785 L; valores
+  do esguicho regulavel do manual). Clique no anel vermelho para o padrao: jato compacto (alcance ate ~20 m a 125 GPM)
+  ou neblina em cone de 30 ou 60 graus em todas as direcoes (curta, gotas freadas pelo ar). Botao
+  vermelho RECOLHIMENTO: o carretel recolhe a mangueira sozinho ate o esguicho voltar a guia.
+- Registro aberto + esguicho aberto + bomba pressurizada: jato pelo esguicho , agua ou espuma conforme o LGE; a vazao entra na conta da bomba; a mangueira fica
+  cheia. Fica depois da junta de expansao (junta rompida corta o mangotinho).
+- Botoes no menu (secao 16): registro, esguicho, "Puxar 6 m", recolher; vista "Carretel de mangotinho".
+- Botao RECOLHIMENTO (no carretel e no menu) funciona por pulso: o carretel recolhe somente enquanto o botao esta
+  pressionado; soltou, o recolhimento para.
+
+CHAVES DO PAINEL CENTRAL
+- As chaves rotativas (TANQUE/BOMBA, AGUA/LGE, BOMBA/TANQUE, DISPERSADOR, INUND. PARABRISA) podem ser giradas mesmo
+  com a chave geral desligada; elas so acionam (bobinas/bomba eletrica) com o painel energizado. Desligar a chave geral
+  nao volta as chaves: ao energizar o painel, as que estiverem na posicao ligada acionam na hora.
+- A chave do canhao de teto foi retirada do painel; no lugar ficam so as lampadas indicativas do atuador (laranja
+  fechado / verde aberto). O canhao de teto e acionado pelo botao do joystick.
+- Esguicho do mangotinho trocado por um esguicho regulavel de jato combinado com punho de pistola (como a foto):
+  storz de aluminio na entrada, corpo preto com valvula de esfera, alavanca (bail) em cima, punho embaixo, anel vermelho
+  de vazao com faixa de indicacao e ponteira vermelha aletada. Comandos: alavanca = abre/fecha (para tras aberto,
+  para a frente fechado); anel = vazao 30/60/95/125 GPM (113,6/227,1/359,6/473,2 L/min); ponteira = padrao (jato
+  compacto, neblina 30 ou 60 graus); arraste pelo corpo/punho para levar o esguicho. Menu: Esguicho, Vazao, Padrao.
+- Esguicho refeito com a segunda foto: alca de abre/fecha em U passando por cima do corpo (dois bracos laterais com
+  pivo de 2 parafusos e barra curva no alto) e punho de pistola arredondado embaixo, inclinado para o lado da
+  entrada, com sulcos para os dedos.
+- Setas nos trechos que faltavam: a linha da expedicao/canhao de teto e a linha do para-choque foram divididas nos Ts.
+  Cada trecho mostra a agua que realmente passa nele: expedicao -> T bomba-tanque (tudo), -> T do para-choque (teto +
+  para-choque + expedicoes laterais + dispersador + mangotinho), -> canhao de teto (so ele); T do para-choque -> T das
+  expedicoes laterais -> T do mangotinho -> T do dispersador -> canhao de para-choque. Assim as setas aparecem mesmo
+  quando so as expedicoes laterais, o mangotinho, o dispersador ou o retorno ao tanque estao abertos.
+- Mangotinho: o esguicho fica a 1 m do chao (na mao do operador) quando a mangueira esta fora do carretel; a mangueira
+  corre pelo chao e sobe no ultimo trecho ate ele. O arraste continua pelo chao (posicao), mas o esguicho nao fica
+  mais no chao. Jato mais denso: ~1100 gotas, mais opacas e concentradas.
+
+BOTAO "IR" (topo do menu lateral)
+- Liga/desliga o modo Ir. Com ele ligado, um clique em qualquer peca ou tubulacao visivel (inclusive no caminhao
+  montado) leva a camera ate ela em 0,8 s, mantendo o angulo atual, e a camera passa a girar em torno do ponto clicado.
+  Nesse modo nenhum clique aciona valvulas, chaves, botoes ou mangueiras; arrastar continua girando a camera.
+- Pecas pequenas ficam centralizadas; em tubos e pecas longas a camera centraliza no ponto clicado. Desligue o Ir
+  para voltar a operar os comandos. (O duplo clique foi removido.)
+- Transbordo refeito: cupula de agua borbulhando sobre a boca da tampa (com anel de espuma), lamina de agua com
+  ondulacoes que se espalha pela chapa superior (~2,5 s) e depois cortinas de agua com filetes descendo pelas quatro
+  laterais do tanque; respingos saltando da tampa, gotas soltando da borda da chapa e espirros no pe das cortinas; a
+  poca no chao cresce com o volume transbordado e seca devagar. Intensidade acompanha a vazao do transbordo; com o
+  tanque contaminado tudo fica esbranquicado (espuma).
+- Correcao do transbordo: as medidas agora vem da chapa superior do tanque (o arquivo do tanque tem outras pecas que
+  aumentavam a caixa) e sao convertidas para as coordenadas do sistema (com o caminhao montado o sistema fica reduzido
+  na hora em que o transbordo e preparado, o que jogava a agua para fora do tanque).
+- Correcao: no primeiro quadro depois da carga as matrizes do grupo do sistema ainda estavam desatualizadas e a
+  conversao nao acontecia (tampa medida em -0,98 / 2,48 / 0,37); agora a cena e atualizada antes de medir.
+- Diagnostico: cada modulo de animacao novo roda protegido (um erro nao trava os outros) e qualquer erro aparece num
+  aviso vermelho no canto inferior esquerdo, com o modulo e a linha do simulador (clique para fechar).
+- Correcao: na mangueira do hidrante, um comentario tinha engolido o laco que monta o trecho no chao (a curva ficava
+  com 1 ponto e dava erro ao desenrolar). Tambem voltou o corpo do registro esferico do mangotinho, que tinha sumido
+  pelo mesmo motivo.
+- Identificacao dos solenoides refeita: etiquetas de 2 linhas ("SOLENOIDE n" + funcao) com a fonte ajustada para caber
+  inteira, texto em alta resolucao, centralizadas sobre cada solenoide e sem se sobrepor. Incluida a etiqueta do
+  solenoide 1 (TANQUE-BOMBA) no painel de baixo.
+- Etiquetas dos solenoides encurtadas para 1 linha: numero + funcao (ex.: "5 · BOMBA-TANQUE"), sem a palavra solenoide.
+
+MENU LATERAL REORGANIZADO
+- Titulo curto com botao "–" para recolher o menu inteiro (vira so a barra do titulo; "+" abre de novo).
+- Barra fixa no alto: Explodir superestrutura, Ir, setas de fluxo com as legendas, Modo normal/corte, lista "Vista"
+  (substitui as ~35 botoes de vistas) e a telinha.
+- As secoes viraram grupos recolhiveis em 4 abas: Bomba (bomba/PTO, succao e escorva, retorno bomba-tanque, admissao),
+  Pneumatica (ar comprimido, lubrifil, painel eletrico, atuador, mangueiras), Linhas (canhao de teto, para-choque, LGE,
+  expedicoes laterais, mangotinho, dispersador) e Cabine (inundador). O primeiro grupo de cada aba abre aberto e a aba
+  escolhida fica lembrada no navegador.
+- Botoes, leituras e textos mais compactos; os textos de ajuda (ⓘ) mostram 2 linhas e abrem por inteiro com um clique.
+- Feito em JavaScript na carga (organizaMenu), sem mudar os ids: todos os comandos continuam funcionando igual.
+- Listas "Vista" e "Telinha" em ordem alfabetica, com nomes completos e iguais nas duas (ex.: "Valvula do canhao de
+  teto", "Painel de solenoides"); a telinha ganhou as vistas novas (expedicoes laterais, dispersador, admissao,
+  hidrante, para-brisa, bomba do inundador, carretel de mangotinho).
+- Vistas ADA, Bomba de incendio e Bypass refeitas: a camera ficava dentro do tanque de LGE (ou olhava atraves dele);
+  agora fica a frente, do lado direito e mais alta, com o tanque de LGE fora da linha de visao.
+- Rotulos flutuantes removidos (bomba, PTO, escorva, tanque de LGE, portas da valvula, dispersador, admissao, hidrante,
+  para-brisa, bomba do inundador, carretel, recolhimento, aviso do registro, T, AGUA/LGE). Ficam so as etiquetas dos
+  solenoides (numero + funcao) e as letras A/B das saidas deles. Para religar um rotulo: ROTULOS_ATIVOS no index.html.
+- Tecla Alt liga/desliga o modo Ir (mesmo efeito do botao).
+
+--- Modo instrução e roteiros guiados ---
+* Botão "Instrução" (barra do topo, ao lado de "Ir") ou tecla I: passe o mouse sobre uma peça para destacá-la (caixa amarela)
+  e ver o nome; clique para abrir a ficha no canto superior direito (o que é, função no sistema, como operar e cuidados,
+  dados técnicos com referência ao manual/apostila) e o botão "Ir até a peça". Nesse modo os cliques não acionam nada.
+  Instrução e Ir são exclusivos (ligar um desliga o outro).
+* "Roteiro" (menu lateral): combate com água do tanque, espuma pelo ADA, sucção de manancial, abastecer pelo hidrante e
+  mangotinho. Cada passo destaca a peça em verde piscando e é marcado sozinho quando você faz a ação no simulador;
+  "Mostrar peça" leva a câmera até ela; "Pular"/"Feito" para passos que não dá para conferir.
+
+--- Som do motor e trabalho a seco da bomba ---
+* Som sintetizado no navegador (sem arquivos de áudio): ao ligar o Motor ouve-se o motor de arranque (~1 s), a pegada
+  e a marcha lenta (650 rpm). O acelerador sobe a rotação até 2100 rpm e o som acompanha. Com o PTO engatado o som fica
+  mais grave/carregado e aparece o zumbido das engrenagens do PTO e do rotor da bomba. Ao desligar, o motor perde giro.
+  Caixa "Som do motor e da bomba" (seção Bomba) liga/desliga o som. O navegador só libera áudio após o primeiro clique.
+* A bomba só gira com o motor funcionando (PTO engatado com motor desligado: "engatada · motor desligado").
+* Trabalho a seco: bomba girando com as admissões fechadas (tanque-bomba fechada ou tanque vazio E esférica de sucção
+  fechada) esvazia em ~1,5 s e passa a girar a seco (a escorva em funcionamento não conta). Aparece o aviso vermelho,
+  a temperatura sobe, ouve-se um ruído de raspagem e o dano acumula (~15 s em rotação máxima, ~30 s em marcha lenta).
+  Acima de 35 % sai fumaça do selo. Em 100 % a bomba fica DANIFICADA (selo mecânico e rotor): quase não gera pressão.
+  Botão "Reparar bomba" zera o dano. Abrir uma admissão com água devolve a água à bomba antes do dano completo.
+
+--- Mangueiras pneumáticas soltam e invertem também no solenoide ---
+* As 12 mangueiras (solenoides 1 a 6) têm plugue nas duas pontas. Na ponta do solenoide: clique no plugue para soltar,
+  arraste até a saída A ou B do mesmo solenoide para ligar (anel verde mostra a saída livre durante o arraste).
+* Botão "Inverter no solenoide" em cada grupo de mangueiras troca A/B nas saídas do solenoide; "Inverter no atuador"
+  continua trocando nas portas do atuador. Inverter nos dois lados se anula. "Original" volta as duas pontas.
+* Saída do solenoide sem mangueira e pressurizada sopra ar para a atmosfera; a mangueira solta do solenoide fica aberta
+  e o lado do atuador ligado a ela escapa (a válvula não fecha/abre por ali). Ponta solta cai abaixo do solenoide.
+* As leituras das mangueiras indicam "(invertida)" ou "solta do solenoide" quando a ponta do solenoide foi mudada.
+
+--- Manancial contaminado com LGE ---
+* Ralo removido + esférica de sucção aberta + tanque-bomba aberta + tanque contaminado: a pré-mistura desce por gravidade
+  para o manancial. Bolhas saem da ponta do mangote, sobem, e um manto de espuma cresce a partir dali; a água do poço
+  perde o azul e fica leitosa, e com mais contaminação uma camada de espuma cobre o poço inteiro (~150 L drenados).
+* Leitura "Manancial" (seção Sucção): limpo / CONTAMINADO com % de espuma; "Dreno por gravidade" avisa "LEVANDO LGE".
+* Succionar de um manancial contaminado traz LGE diluído para a bomba (pode contaminar o tanque pelo retorno).
+* Botão "Trocar água do manancial" volta o poço a água limpa.
+
+--- Sistema de panes (exercícios de diagnóstico) ---
+* Botão "Panes" (barra do topo): escolha a missão (canhão de teto, para-choque, espuma, sucção de manancial, dispersador
+  ou livre) e a pane (ou "Aleatória (escondida)"), clique em Iniciar. A missão termina com a água saindo na expedição
+  pedida por 3 s; o cartão mostra tempo, tentativas de reparo e se a pane foi consertada ou contornada à mão.
+  "Dica" mostra sintomas aos poucos; "Revelar" mostra a pane e a solução; "Encerrar" desfaz a pane.
+* Panes: bobina queimada (solenoides 1-6), fusível do painel central, mangueira de ar furada (chiado e ar escapando,
+  atuador sem força), mangueira solta no atuador, mangueiras invertidas no solenoide, compressor sem carga (correia),
+  filtro do lubrifil entupido (~1,2 bar), entrada de ar na sucção (porca do mangote: escorva não faz vácuo) e ralo
+  entupido (vácuo alto, cavitação, perde a escorva).
+* Contornos manuais: botão manual azul do solenoide; sem ar nas câmaras, soltar as mangueiras e operar a válvula pela
+  alavanca. Conserto: botão "Reparar" (tecla R) e clicar na peça com defeito (solenoide, painel central, mangueira,
+  compressor/lubrifil, porca do mangote, ralo). Mangueira solta/invertida se resolve religando na porta certa.
+
+--- Missão: succionar do manancial e abastecer o tanque ---
+* Nova missão em "Panes": cumprida com a bomba puxando do manancial (>200 L/min) e o retorno bomba-tanque enchendo o
+  tanque (>200 L/min) por 3 s, com a válvula tanque-bomba fechada.
+* Panes possíveis: entrada de ar na sucção, ralo entupido, mangueiras do solenoide 1 invertidas (a tanque-bomba abre
+  sozinha e o tanque tem prioridade sobre o manancial), bobina 5 queimada, mangueira do solenoide 5 furada / solta /
+  invertida, fusível do painel (sem escorva: precisa consertar), compressor sem carga e filtro do lubrifil entupido.
+* Novo roteiro guiado com o mesmo procedimento.
+
+--- Panes só com solução manual (modo Reparar removido) ---
+* O botão "Reparar" (tecla R) foi retirado. Toda pane sorteada pode ser resolvida à mão no próprio simulador:
+  bobina queimada / fusível → botão manual azul do solenoide; mangueira furada, compressor sem carga, filtro entupido →
+  soltar as mangueiras do atuador e operar a válvula pela alavanca; mangueira solta/invertida → religar; entrada de ar
+  na sucção → com o PTO desligado, clicar na porca do mangote para reapertar; ralo entupido → retirar e recolocar o ralo.
+* O fusível do painel não é mais sorteado nas missões que precisam da escorva (não há como acioná-la à mão).
+
+--- Escorva com a água do tanque (pane na escorva) ---
+* Nova pane "Bomba de escorva não funciona" nas missões de sucção. O fusível do painel voltou a essas missões, pois
+  tem o mesmo contorno.
+* Contorno (também como roteiro guiado): abrir a tanque-bomba (botão ou manual azul) e a esférica da sucção, retirar o
+  ralo (a água do tanque desce e expulsa o ar do mangote), engatar o PTO, recolocar o ralo (a retenção segura a coluna),
+  fechar a tanque-bomba e abrir uma saída: a bomba passa a puxar do manancial.
+* Física: com o ralo instalado, abrir o tanque não escorva mais o mangote sozinho (o ar fica preso entre a água do tanque
+  e a retenção do ralo); é preciso retirar o ralo ou usar a escorva.
+
+--- Escorva pelo tanque no modo normal ---
+* Seção Sucção: caixa "Escorva inoperante (escorvar com a água do tanque)" desliga a escorva fora dos exercícios de pane,
+  e o botão "Passo a passo: escorvar com a água do tanque" abre o roteiro guiado. O método funciona sempre (com ou sem a
+  escorva), pois a física da linha de sucção é a mesma no modo normal.
+
+--- Escorva pelo tanque precisa de água suficiente ---
+* Com o ralo retirado, a água que desce do tanque precisa expulsar o ar da linha: cerca de 130 L passam pelo mangote até
+  a linha ficar cheia (a leitura "Dreno por gravidade" mostra "expulsando o ar do mangote X %" e depois "linha sem ar").
+  A água continua descendo a ~1100-1500 L/min enquanto o ralo estiver fora: demorar para recolocá-lo esvazia o tanque.
+* Com pouca água (ex.: 100 L) o tanque esvazia antes de purgar o ar, a coluna cai e o método falha; a bomba engatada
+  ainda pode girar a seco. Teste: 6100 L e 300 L funcionam; 100 L não.
+
+--- Alertas na tela ---
+* Os avisos importantes aparecem no centro superior da tela (em telas estreitas, embaixo), com cor por gravidade:
+  vermelho = perigo/dano (bomba a seco, sobreaquecimento, >15 bar, junta rompida, tanque vazio), laranja = atenção
+  (transbordo, tanque quase cheio, cavitação, escorva, contaminação, LGE baixo, PTO sem motor, aviso do painel),
+  azul = informação (escorva ligada, ralo fora com % de ar expulso, exercício de pane), verde = missão cumprida.
+* Eventos rápidos: "Linha de sucção sem ar: recoloque o ralo", "Bomba escorvada", bomba danificada, fim de missão.
+* O X esconde aquele alerta até ele sumir e voltar; a caixa "Alertas na tela" (abaixo de Explodir) desliga todos.
+* As mensagens de aviso saíram do menu lateral (painel, escorva, bomba a seco); aparecem só como alertas na tela.
+
+--- Restaurar padrão inicial ---
+* Botão "↺ Restaurar padrão inicial" (menu lateral, abaixo de "Alertas na tela"): pede confirmação e recarrega o
+  simulador do zero (tanques cheios e limpos, válvulas, mangueiras e solenoides originais, sem panes nem roteiro,
+  bomba sem dano, manancial limpo, câmera e aba do menu iniciais).
+
+--- Novas panes e missões (todas com solução manual) ---
+* Missões novas: abastecer o tanque (+500 L; começa com o tanque a 40 %), combater com o mangotinho, combater com uma
+  linha lateral 2½".
+* Panes novas:
+  - Carretel do solenoide travado (1-6): LED acende, nada comuta nem pelo botão azul → "Inverter no solenoide"
+    (repouso passa a abrir) ou soltar mangueiras e usar a alavanca.
+  - Válvula emperrada (1-6): precisa de ~5,5 bar → subir o regulador a 6 bar ou usar a alavanca.
+  - Vedação do atuador vazando (1-6): chiado no atuador, sem força → alavanca sem as mangueiras.
+  - Chave com mau contato (TANQUE/BOMBA, ÁGUA/LGE, BOMBA/TANQUE, DISPERSADOR): válvula aos trancos → botão manual azul.
+  - Joystick do canhão de teto com defeito → botão manual do solenoide 3.
+  - Painel do para-choque sem energia (luz apagada) → botão manual do solenoide 4.
+  - Regulador do lubrifil desregulado (~1 bar) → reajustar para ~4 bar.
+  - Dreno do reservatório aberto (chiado embaixo do reservatório) → clicar na torneirinha para fechar.
+  - Retenção do ralo presa aberta (coluna cai com o PTO desligado) → retirar e recolocar o ralo.
+  - Bomba-tanque emperrada aberta (sem pressão nas expedições) → soltar mangueiras e fechar pela alavanca.
+  - Válvula de LGE emperrada fechada → soltar mangueiras e abrir pela manopla.
+  - Storz da linha lateral / da admissão mal acoplado (jorra no engate) → recolher e arremessar de novo.
+  - Hidrante sem pressão → abastecer succionando do manancial com o retorno bomba-tanque.
+* A torneirinha de dreno do reservatório também pode ser aberta/fechada no uso normal (clique nela).
+
+--- Missão: apagar o fogo com o canhão de teto ---
+* Fogo animado (chamas, fumaça, brilho, vapor quando atingido) sobre uma pilha de madeira a 50 m à frente do canhão de
+  teto. O canhão tem elevação fixa: o jato só apaga se cair na zona do fogo. Água: ~9,5 a 12 bar (acelerador ~65-80 %);
+  espuma (alcance 25 % menor, apaga mais rápido): ~12,7 a 15 bar, perto do limite da junta. Jato curto não chega;
+  jato forte passa por cima. Sem jato, o fogo volta a crescer. Alerta na tela mostra onde o jato está caindo.
+* Missão "Jogar água pelo canhão de teto" sorteada com a pane "bomba-tanque emperrada aberta" vira esta missão.
+  Também pode ser escolhida direto ("Apagar o fogo a 50 m com o canhão de teto"). Botão "Ver o alvo / canhão".
+* Física: com a bomba-tanque aberta a descarga perde ~45 % da pressão (máx. ~8 bar → jato ~39 m). Fechar a
+  bomba-tanque com um canhão aberto dá golpe de aríete: acelerado a fundo rompe a junta de expansão; a ~75 % não.
+
+--- Teclado e cartão CONTROLES ---
+* Botão "Controles" (barra do topo) ou tecla ? abre a lista de atalhos. As teclas fazem o mesmo que os botões do menu
+  e mostram um aviso rápido na tela com o novo estado.
+  Cabine: M motor · P PTO · ↑/↓ acelerador ±5 % (segure para variar contínuo) · PgUp/PgDn ±25 % · Home 0 % · End 100 %
+  Painel central: G chave geral · T TANQUE/BOMBA · L ÁGUA/LGE · B BOMBA/TANQUE · D DISPERSADOR · W INUND. PARABRISA ·
+                  J joystick (canhão de teto) · E escorva manual
+  Para-choque: K energiza o painel · H joystick do para-choque
+  Solenoides: 1 a 6 botão manual azul
+  Sucção/linhas: S esférica da sucção · R ralo · A válvula da admissão · Q/Z válvula lateral esquerda/direita
+  Mangotinho: O registro · U esguicho · V vazão · N padrão · C recolher (segure)
+  Tela: X explodir/montar · I instrução · Alt Ir · ? controles
+* Ajuste: só os botões dos painéis e os joysticks têm tecla (P, acelerador ↑↓ PgUp PgDn Home End, G, T, L, B, D, W,
+  E, J, K, H). Motor, solenoides, sucção, ralo, admissão, linhas laterais, mangotinho e explodir ficaram só no mouse.
+* Tecla M: motor (liga/desliga).
+
+--- Sons reais (assets/sons) ---
+* Arquivos em assets/sons/ (.mp3/.ogg/.wav) com os nomes da lista em assets/sons/LEIA-SONS.txt substituem os sons
+  sintetizados: motor_partida, motor_lenta, motor_alto, motor_desliga, pto_engate, bomba, escorva, bip, ar_vazando,
+  agua_jato, seco, fogo. O que faltar continua sintetizado. Volume e rotação de referência em SOM.cfg.
+
+
+--- Esquema 2D (nova tela de instrução) ---
+* assets/2d/: 42 desenhos 2D em SVG dos itens do sistema (reservatórios, bomba e acionamento, espuma, válvulas,
+  pneumática, comandos, expedições, sucção/abastecimento e peças de tubulação) + 2 fundos do caminhão (vista lateral
+  e superior, escala 1 m = 100 px) + catalogo.json (id, nome, categoria, arquivo, largura sugerida, descrição).
+* esquema.html (botão "Esquema 2D" no simulador, abre em outra aba): o instrutor arrasta os itens do menu para o
+  esquema do caminhão. Mover (arrastar), girar (alça redonda ou R / Shift+R), redimensionar (alça quadrada), espelhar
+  (F), duplicar (Ctrl+D), excluir (Del), trazer para frente / enviar para trás, nome próprio por item, posição em
+  metros. Zoom na roda do mouse, arrastar o fundo move a vista, Enquadrar, grade e encaixe, desfazer/refazer
+  (Ctrl+Z / Ctrl+Y). O esquema fica salvo no navegador; "Salvar arquivo" / "Abrir arquivo" (.json) e Imprimir.
+* Para gerar os SVGs de novo ou mudar o estilo: python ferramentas/gera2d.py (reescreve assets/2d).
+* Correção: esquema.html agora traz os desenhos embutidos (não depende de o servidor entregar .svg com o tipo certo)
+  e só enquadra a vista quando a aba já tem tamanho. Erros aparecem numa faixa vermelha no canto.
+  Depois de mudar os desenhos: python ferramentas/gera2d.py e python ferramentas/monta_esquema.py.
+* O botão "Esquema 2D" agora abre o esquema por cima do simulador, na mesma aba (o simulador continua rodando por
+  baixo, no estado em que estava). "← Simulador 3D" fecha a camada e volta. Aberto sozinho, esquema.html continua
+  funcionando como página própria.
+
+--- Esquema 2D: alças, giro e Play ---
+* Alças: 4 lados esticam só naquela direção (sem manter a proporção; o lado oposto fica parado); 4 cantos
+  redimensionam mantendo a proporção. Botões ↺ ↻ junto à alça de giro giram 15° (Shift: 90°); a alça redonda gira
+  livre. No painel: largura e altura separadas e "Proporção original".
+* Conexões: cada peça hidráulica tem pontos de ligação (bolinhas: verde = ligada, laranja = livre). Ao arrastar, a peça
+  encaixa sozinha quando um ponto chega perto de outro.
+* ▶ Play: a água sai das fontes (tanques; hidrante aberto; manancial pelo mangote com o ralo dentro dele e uma bomba
+  ligada) e avança ~3 m/s pelas peças ligadas; válvula fechada barra; retenção só num sentido. Bomba ligada com água
+  na entrada pressuriza a saída; expedições (canhões, esguicho, dispersador, inundador) lançam o jato; ponta de tubo
+  livre com pressão jorra. Clique nas válvulas, bombas e hidrante para atuar (etiqueta ABERTA/FECHADA, LIGADA). O
+  quadro "Simulação da água" diz em que expedição a água chegou e se tem pressão. Água azul, LGE amarelo, mistura verde.
+* Correção: no Play a água segue o caminho interno das peças (curva 90°, tê, ADA, bomba, mangote) em vez de cortar em linha reta.
+* PTO e cardan no Play: a ponta do cardan e o eixo da bomba de incêndio (embaixo dela) têm um losango de ligação
+  mecânica (roxo = livre, verde = ligado; encaixa sozinho ao arrastar). No Play clica-se no PTO (ENGATADO /
+  DESENGATADO); a bomba de incêndio só gira (GIRANDO, rotor animado, cardan girando) com um PTO engatado ligado a ela.
+  A bomba elétrica continua ligando pelo clique. O quadro explica o que falta (sem PTO, cardan solto, PTO desengatado).
+* Sem pressão a água não sobe acima do nível da fonte (topo do tanque); depois de passar por bomba girando, sobe.
+* Botão "Sistema completo" (esquema 2D): monta e liga sozinho, na vista lateral, o mesmo sistema do simulador 3D —
+  tanque de água (saída embaixo, retorno pela tampa), admissão + hidrante, válvula tanque-bomba, sucção de manancial
+  (esférica, mangote, ralo no manancial), bomba de incêndio com PTO/cardan, ADA com válvula e tanque de LGE, junta de
+  expansão, retorno bomba-tanque, canhão de teto, expedição lateral, mangotinho (registro, carretel, esguicho),
+  dispersador, canhão de para-choque e inundador com a bomba elétrica; painéis, solenoides, lubrifil, compressor e
+  escorva ficam numa fileira abaixo (sem ligação hidráulica). Funciona no Play. Substitui o esquema atual (Ctrl+Z volta).
+* Peças de tubulação (tubos, curvas, tês, redução, fio) não mostram nome, a menos que o instrutor dê um.
+* Ligar com um clique: clique numa bolinha de conexão e depois em outra; a tubulação é criada sozinha só com tubos
+  retos e curvas de 90° (sai pela boca da primeira peça e chega de frente na outra, sem voltar para trás e com o menor
+  número de curvas). Linha reta direta só quando as bocas estão alinhadas e de frente. Em trechos apertados a curva
+  fica menor. Esc ou clique no vazio cancela; Ctrl+Z desfaz a tubulação inteira.
+* Correção no Play do esquema 2D:
+  - Bypass: não conduz mais a água do tanque; só recircula da descarga (com a bomba girando) para a sucção.
+  - LGE: só é aspirado pelo ADA quando passa água com pressão por ele (venturi); parado, fica na linha de LGE. A
+    mistura só segue no sentido em que a água anda (descarga → expedições) e não volta pela tanque-bomba para o tanque.
+* Escorva no Play do esquema 2D: o manancial só alimenta a bomba depois que a linha é escorvada. Ligue a "Bomba de
+  escorva" (clique; ela precisa estar ligada à linha de sucção do manancial, por exemplo num tê): após 3 s a linha fica
+  escorvada e a escorva desliga sozinha; limite de 30 s. Encher a linha com água do tanque também escorva. Sem isso,
+  a bomba gira e o quadro avisa "bomba girando sem escorva". O "Sistema completo" já traz a escorva ligada à sucção.
+* Didático: a escorva só escorva se estiver ACIMA da admissão da bomba (senão não enche o tubo até a bomba); abaixo,
+  ela liga mas o quadro avisa para reposicioná-la.
+* Menu do esquema 2D enxugado para o modo didático: saíram junta de expansão, válvula de retenção, toda a pneumática
+  (solenoide, painel de solenoides, lubrifil, compressor, mangueira de ar, atuador), os comandos (painéis e joystick;
+  fica só a bomba elétrica do inundador), o esguicho regulável e o fio elétrico. Os desenhos continuam em assets/2d
+  (lista FORA_DO_MENU em ferramentas/esquema_modelo.html). O carretel do mangotinho passou a ser a própria saída de
+  água (jato na ponta). "Sistema completo" já monta sem esses itens.
+* Correção (esquema 2D, "ficou tudo com LGE"): a tubulação automática, com bocas quase alinhadas, criava um
+  "degrau" com curvas minúsculas que não fechava, e a tolerância de ligação (9 px) emendava bocas vizinhas de linhas
+  diferentes — o LGE vazava para a rede de água mesmo com a válvula de LGE fechada. Agora: bocas quase alinhadas e de
+  frente ganham um tubo reto só; a ligação exige bocas a até 6 px.
+* Play: bomba ligada com a entrada seca agora explica o motivo no quadro (ex.: entrada acima do nível do tanque — a bomba não puxa a água sozinha).
+* Tanque de água (esquema 2D) com mais duas conexões, nas laterais esquerda e direita: só entrada, para abastecer por pressão (hidrante/admissão) e para o retorno bomba-tanque. O quadro do Play mostra 'abastecendo pela entrada ...' quando chega água com pressão.
+
+--- Sistema de pó químico seco (PQS) — visualização separada ---
+* Botão "PQS" (barra do topo) ou aba PQS do menu → "Abrir visualização do PQS": o sistema de água e o caminhão somem
+  e a câmera vai para o conjunto de PQS (montado à parte, 30 m ao lado). "← Voltar ao sistema de água" retorna.
+* Peças (manual p. 26–31, apostila p. 10–11): tanque de pó amarelo 220 kg (tampa de abastecimento, válvula de
+  segurança), painel com manômetro do tanque (faixa verde 10–11 bar) e válvula de despressurização vermelha ¼ de volta;
+  cilindro de N₂ 200 bar com registro (volante) e regulador com manômetro; mangueira de alta até a esfera de
+  pressurização (azul) que entra no topo do tanque; coletor de pó saindo do fundo para os dois lados; em cada lado
+  uma esfera de pó (vermelha) e uma esfera de limpeza (azul) ligada à linha verde de N₂ que sai do regulador e entra
+  depois da esfera de pó; 2 carretéis vermelhos com 10 m de mangueira (no real, 30 m) e pistola com gatilho.
+* Ativação manual (a elétrica foi desativada): registro do N₂ → esfera de pressurização → 10–11 bar → puxar a
+  mangueira (clique no carretel ou na pistola; arraste a pistola, até 10 m, a 1 m do chão) → esfera de pó → gatilho
+  (clique e segure na pistola, ou "Gatilho E/D (segure)" no menu). Jato de pó com alcance ~20 m na pressão de serviço
+  (proporcional à pressão), ~2 kg/s; o tanque esvazia em ~2 min por pistola.
+* Limpeza: feche a esfera de pó, abra a de limpeza e aperte o gatilho: sai o pó que ficou na mangueira e depois só
+  gás (~3 s). Mangueira com pó parada mostra alerta. Despressurização: válvula vermelha até zerar. "Trocar cilindro
+  de N₂" (alerta quando o cilindro usado cai abaixo de 150 bar) e "Reabastecer pó" (só com o tanque em 0 bar).
+* PQS: esferas com o corpo no eixo do tubo (as dos carretéis ficam na vertical, no próprio tubo, com flanges) e
+  alavanca na haste. Mangueira sai pela traseira da pistola, em linha com ela (último trecho reto no eixo da pistola);
+  o jato sai do bico da pistola na direção em que ela aponta.
+* Animação do fluxo (pontos visíveis por cima dos tubos): N₂ azul-claro do cilindro → regulador → esfera → topo do
+  tanque enquanto pressuriza (ou repõe gás durante o disparo); pó creme do fundo do tanque → coletor → esfera de pó →
+  carretel → mangueira → pistola enquanto o gatilho está apertado; N₂ da linha de limpeza → esfera de limpeza →
+  carretel → mangueira → pistola na limpeza.
+
+- PQS / limpeza da linha: ao abrir a esfera de limpeza e apertar o gatilho, o N2 entra
+  pelo T a jusante da esfera de pó e vai empurrando o pó residual (partículas creme) pela
+  tubulação e mangueira até sair pela pistola; a frente de N2 (azul) avança até o bico e,
+  quando a linha fica limpa, sai só nitrogênio.
+
+- PQS: nuvem de pó mais densa (3x mais partículas, mais opaca e com grãos maiores).
+
+- PQS: cilindro de N2 montado de ponta-cabeça (registro e regulador embaixo, com chapa de suporte e cintas).
+  A linha de limpeza (verde) agora sai de um T logo após a esfera de pressurização: com a esfera aberta o
+  gás vem do N2; com ela fechada a limpeza usa o gás do topo do tanque (que perde pressão).
+
+- PQS: consumo de N2 ajustado — um cilindro cheio (200 bar) pressuriza o tanque (~35 bar), expele os 220 kg
+  de pó (~86 bar) e ainda limpa as duas linhas (~11 bar), sobrando cerca de 68 bar.
+
+- PQS integrado à cena do sistema de água: fica ao lado (+x, a ~6,6 m), girado para as mangueiras e o jato
+  irem para +x, longe do manancial e do canhão. Aparece/some junto com o sistema ao explodir/montar o caminhão.
+  Os botões "PQS"/"Ver sistema de PQS" só levam a câmera até ele (explodindo a superestrutura se preciso).
+  Corrigida a orientação da pistola (o lookAt usava coordenadas locais como se fossem da cena).
+
+- PQS reduzido para 62% e aproximado do sistema de água (centro em x=3,7 m, z=0,6 m), apoiado no mesmo chão.
+  Mangueira continua com alcance de ~10 m reais e o jato de ~20 m.
+
+- Menu lateral reorganizado:
+  * Topo: Explodir/Montar + lista "Ir para vista" (inclui PQS); linha de ferramentas (Instrução, Panes, Ir, Esquema 2D,
+    Controles); Roteiro; "Exibição e opções" recolhido (modo normal/corte, setas, legendas, alertas, som, câmera lenta,
+    telinha, restaurar).
+  * Abas por sistema: Partida (ar comprimido, painel elétrico, bomba/PTO) · Água (válvula tanque-bomba, sucção/escorva,
+    retorno bomba-tanque, admissão) · Espuma (LGE) · Expedições (canhões, laterais, mangotinho, dispersador, inundador) · PQS.
+  * Em cada grupo: comandos e leituras principais; "Pneumática: mangueiras e botão manual" e "Como funciona" recolhidos.
+  * Só um grupo aberto por vez dentro da aba.
+
+- PQS: jato de pó contínuo enquanto o gatilho estiver apertado (antes as partículas acabavam e o jato saía em
+  rajadas); som do jato: chiado do N2 + ronco grave do pó (só chiado na limpeza), sopro na despressurização e na
+  válvula de segurança. Usa a opção "Som do motor e da bomba".
+
+- Roteiros guiados novos: combate com água do tanque pelo canhão de para-choque; combate com linha de mangueira
+  (expedição lateral 2½"); usar o dispersador; utilizar o sistema de PQS (pressurizar, disparar, limpar, recolher,
+  despressurizar). Fichas de instrução novas para o tanque de PQS, o cilindro de N2 e os carretéis.
+
+
+- Menu em roda (estilo seletor de armas): Tab abre/fecha (ou botão "☰ Menu" no canto). Mouse na direção da opção +
+  clique, Enter ou número 1–9; botão direito/Backspace/centro volta; Esc fecha. Raiz: Partida, Água, Espuma,
+  Expedições, PQS, Vistas, Roteiros, Ferramentas, Opções. Os grupos abrem num cartão flutuante arrastável (mesmos
+  comandos e leituras do antigo menu lateral, que ficou oculto). O último cartão aberto volta ao recarregar.
+
+- Modo Ir agora na tecla Shift (sozinha, alterna ao soltar; Shift+outra tecla não aciona). O Alt deixou de ser usado.
+
+- Tecla X: explodir / montar a superestrutura (aparece em Controles e na roda → Ferramentas).

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Esquema 2D · montagem da superestrutura</title>
+<style>
+  :root{--bg:#eef1f5;--panel:#ffffff;--bd:#d5dbe3;--txt:#1d2733;--mut:#6b7785;--acc:#c62828;--sel:#1e88e5;--ok:#2e7d32}
+  *{box-sizing:border-box} html,body{margin:0;height:100%;font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--txt);background:var(--bg)}
+  #app{display:grid;grid-template-columns:270px 1fr;grid-template-rows:auto 1fr;height:100vh}
+  header{grid-column:1/3;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#1d2733;color:#fff}
+  header h1{font-size:15px;margin:0 10px 0 0;letter-spacing:.02em} header .esp{flex:1}
+  header button,header select,header label{font:inherit;color:#fff;background:#2e3a48;border:1px solid #445366;border-radius:8px;padding:5px 9px;cursor:pointer}
+  header button:hover{background:#3a4859} header a{color:#fff}
+  header label{display:flex;align-items:center;gap:5px}
+  #play{background:#2e7d32;border-color:#2e7d32;font-weight:700} #play.on{background:var(--acc);border-color:var(--acc)}
+  aside{background:var(--panel);border-right:1px solid var(--bd);overflow:auto;padding:10px}
+  aside input[type=search]{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;font:inherit;margin-bottom:8px}
+  details{margin:0 0 6px} summary{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);cursor:pointer;padding:4px 2px}
+  .pal{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 8px}
+  .it{border:1px solid var(--bd);border-radius:10px;padding:6px 4px 5px;text-align:center;cursor:grab;user-select:none;background:#fafbfc;touch-action:none}
+  .it:hover{border-color:var(--sel);background:#f0f7ff} .it img{height:46px;max-width:100%;pointer-events:none;display:block;margin:0 auto 3px} .it span{font-size:11px;display:block}
+  body.tocando aside{opacity:.45;pointer-events:none}
+  main{position:relative;overflow:hidden}
+  #palco{width:100%;height:100%;display:block;background:#f8fafc;touch-action:none;cursor:default}
+  #props{position:absolute;right:12px;top:12px;width:250px;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;box-shadow:0 6px 22px rgba(0,0,0,.12);display:none}
+  #props h3{margin:0 0 6px;font-size:13px} #props label{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:12px;color:var(--mut)} #props label span{width:78px}
+  #props input{flex:1;min-width:0;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;font:inherit}
+  #props .linha{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px} #props button{flex:1;font:inherit;font-size:12px;padding:5px 4px;border:1px solid var(--bd);border-radius:7px;background:#f4f6f8;cursor:pointer}
+  #props button:hover{background:#e8edf2} #props .del{color:#b71c1c}
+  #estado{position:absolute;right:12px;top:12px;width:280px;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;box-shadow:0 6px 22px rgba(0,0,0,.12);display:none;font-size:12.5px}
+  #estado h3{margin:0 0 6px;font-size:13px} #estado ul{margin:4px 0 0;padding-left:18px} #estado li{margin:3px 0} #estado .ok{color:var(--ok);font-weight:700} #estado .mut{color:var(--mut)}
+  #dica{position:absolute;left:12px;bottom:10px;color:var(--mut);font-size:12px;background:rgba(255,255,255,.88);padding:5px 8px;border-radius:8px;pointer-events:none;max-width:calc(100% - 24px)}
+  #fantasma{position:fixed;pointer-events:none;opacity:.8;z-index:50;display:none}
+  .rot{font:600 11px system-ui,Arial;fill:#1d2733;paint-order:stroke;stroke:#fff;stroke-width:4px;pointer-events:none}
+  .badge{font:700 10px system-ui,Arial;pointer-events:none}
+  @media print{ header,aside,#props,#dica,#estado{display:none!important} #app{display:block} main{height:100vh} }
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Esquema 2D · superestrutura</h1>
+  <button id="play" title="Simular a água no esquema montado">▶ Play</button>
+  <select id="fundo" title="Fundo do esquema"></select>
+  <label><input type="checkbox" id="grade" checked> Grade</label>
+  <label><input type="checkbox" id="ima" checked> Encaixar</label>
+  <label><input type="checkbox" id="rotulos" checked> Nomes</label>
+  <label><input type="checkbox" id="portas" checked> Conexões</label>
+  <button id="desfaz" title="Ctrl+Z">↶</button><button id="refaz" title="Ctrl+Y">↷</button>
+  <button id="ajusta" title="Mostrar tudo">⤢ Enquadrar</button><button id="completo" title="Monta no esquema o sistema completo do simulador 3D, já ligado">Sistema completo</button>
+  <span class="esp"></span>
+  <button id="exporta" title="Baixar o esquema (.json)">Salvar arquivo</button><button id="importa">Abrir arquivo</button><input type="file" id="arq" accept=".json" hidden>
+  <button id="imprime">Imprimir</button><button id="limpa">Limpar</button>
+  <a href="index.html" id="voltar" title="Voltar ao simulador 3D"><button>← Simulador 3D</button></a>
+</header>
+<aside>
+  <input type="search" id="busca" placeholder="Procurar item…">
+  <div id="paleta"></div>
+</aside>
+<main>
+  <svg id="palco" xmlns="http://www.w3.org/2000/svg"><defs>
+    <pattern id="gp" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#e3e8ee" stroke-width="1"/></pattern>
+    <pattern id="gg" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#gp)"/><path d="M100 0H0V100" fill="none" stroke="#cfd6df" stroke-width="1.5"/></pattern></defs>
+    <g id="mundo"><rect id="gradeR" x="-5000" y="-5000" width="10000" height="10000" fill="url(#gg)"/><image id="fundoImg"/><g id="itens"></g><g id="agua"></g><g id="marcas"></g><g id="selG"></g></g></svg>
+  <div id="props"><h3 id="pNome"></h3>
+    <label><span>Nome</span><input id="pRot" placeholder="(nome do item)"></label>
+    <label><span>X / Y (m)</span><input id="pX" type="number" step="0.05"><input id="pY" type="number" step="0.05"></label>
+    <label><span>Larg. / alt. (m)</span><input id="pW" type="number" step="0.05" min="0.05"><input id="pH" type="number" step="0.05" min="0.05"></label>
+    <label><span>Giro (°)</span><input id="pR" type="number" step="15"></label>
+    <div class="linha"><button id="bAnti" title="Girar 15° anti-horário (Shift: 90°)">↺ 15°</button><button id="bHor" title="Girar 15° horário (Shift: 90°)">↻ 15°</button><button id="bEspelha">⇋ Espelhar</button></div>
+    <div class="linha"><button id="bProp" title="Volta à proporção original do desenho">Proporção original</button><button id="bDup">Duplicar</button></div>
+    <div class="linha"><button id="bFrente">Para frente</button><button id="bTras">Para trás</button><button id="bDel" class="del">Excluir</button></div></div>
+  <div id="estado"><h3>Simulação da água</h3><div id="estTxt"></div></div>
+  <div id="dica"></div>
+</main>
+</div>
+<img id="fantasma"><div id="erro" style="display:none;position:fixed;left:12px;bottom:12px;background:#b71c1c;color:#fff;padding:8px 12px;border-radius:8px;z-index:99;font-size:12px"></div>
+<script>
+const CAT=/*CATALOGO*/null;
+const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+window.addEventListener('error',e=>{ const d=$('erro'); if(d){ d.style.display='block'; d.textContent='Erro: '+e.message+' (linha '+e.lineno+')'; } });
+const URLS={}; function url(o){ if(!URLS[o.id]){ try{ URLS[o.id]=o.svg?URL.createObjectURL(new Blob([o.svg],{type:'image/svg+xml'})):o.arquivo; }catch(e){ URLS[o.id]=o.arquivo; } } return URLS[o.id]; }
+const ITEM=Object.fromEntries(CAT.itens.map(i=>[i.id,i]));
+// ---------- hidraulica: portas de cada desenho (coordenadas do desenho) e papel na simulacao ----------
+// tipo: fonte | bomba | valvula | retencao | passa | saida (expedicao) | mangote | admissao
+const HID={
+ tanque_agua:{tipo:'fonte',agua:'agua',portas:[[100,118],[100,6],[2,96],[198,96]],entradas:[1,2,3]},   // 0 saida (embaixo); 1 tampa, 2 e 3 laterais: so entrada (abastecimento / retorno)
+ tanque_lge:{tipo:'fonte',agua:'lge',portas:[[60,118]]},
+ hidrante:{tipo:'fonte',agua:'agua',pressao:true,clica:true,portas:[[64,70],[16,70]]},
+ pto_cardan:{tipo:'pto',clica:true,portas:[],eixos:[[194,35]]},
+ bomba_incendio:{tipo:'bomba',acion:'pto',eixos:[[60,112]],portas:[[10,60],[98,10]],vias:{'0-1':[[60,60],[98,36]]}},
+ bomba_eletrica:{tipo:'bomba',clica:true,portas:[[84,60],[101,20]],vias:{'0-1':[[84,42],[101,32]]}},
+ valvula_borboleta_pneu:{tipo:'valvula',clica:true,portas:[[4,63],[96,63]]},
+ valvula_borboleta_manual:{tipo:'valvula',clica:true,portas:[[4,63],[96,63]]},
+ valvula_esferica:{tipo:'valvula',clica:true,portas:[[4,61],[96,61]]},
+ valvula_lge:{tipo:'valvula',clica:true,portas:[[4,76],[96,76]]},
+ expedicao_storz:{tipo:'valvula',clica:true,portas:[[4,41],[104,41]]},
+ admissao:{tipo:'valvula',clica:true,portas:[[4,41],[106,41]]},
+ valvula_retencao:{tipo:'retencao',portas:[[4,35],[96,35]]},
+ junta_expansao:{tipo:'passa',portas:[[4,35],[96,35]]},
+ bypass:{tipo:'passa',portas:[[40,4],[40,106]]},
+ ada_proporcionador:{tipo:'passa',portas:[[55,4],[55,136],[106,70]],vias:{'0-2':[[55,70]],'1-2':[[55,70]]}},
+ carretel_mangotinho:{tipo:'saida',portas:[[2,52]],bico:[128,52,1,-0.05],alc:110},
+ tubo_reto:{tipo:'passa',portas:[[4,20],[196,20]]},
+ tubo_curva:{tipo:'passa',portas:[[10,30],[70,90]],vias:{'0-1':[[40,30],[53.1,31.9],[62.5,37.5],[68.1,46.9],[70,60]]}},
+ tubo_te:{tipo:'passa',portas:[[6,40],[114,40],[60,84]],vias:{'0-2':[[60,40]],'1-2':[[60,40]]}},
+ tubo_reducao:{tipo:'passa',portas:[[6,30],[114,30]]},
+ bomba_escorva:{tipo:'escorva',clica:true,portas:[[37,92]]},
+ mangote_ralo:{tipo:'mangote',portas:[[20,4],[80,140]],vias:{'0-1':[[20,10],[23,38],[35,55],[50,61],[65,70],[77,90],[80,110]]}},
+ canhao_teto:{tipo:'saida',portas:[[75,116]],bico:[138,30,1,-0.8],alc:260},
+ canhao_parachoque:{tipo:'saida',portas:[[61,96]],bico:[118,42,1,-0.45],alc:200},
+ esguicho:{tipo:'saida',portas:[[4,38]],bico:[122,38,1,-0.05],alc:120},
+ dispersador:{tipo:'saida',portas:[[4,29]],bico:[90,29,1,0.1],alc:70,leque:true},
+ inundador:{tipo:'saida',portas:[[80,8]],bico:[80,22,0,1],alc:55,cortina:true}};
+const NOME_EST={valvula:['FECHADA','ABERTA'],bomba:['DESLIGADA','LIGADA'],fonte:['FECHADO','ABERTO'],pto:['DESENGATADO','ENGATADO'],escorva:['DESLIGADA','LIGADA']};
+const E={itens:[],fundo:'lateral',sel:null,uid:1,tocando:false}, HIST={pilha:[],refaz:[]};
+const vista={x:-40,y:-40,z:1};
+function salva(){ try{ localStorage.setItem('cci_esquema2d',JSON.stringify({itens:E.itens,fundo:E.fundo,uid:E.uid})); }catch(e){} }
+function marca(){ HIST.pilha.push(JSON.stringify(E.itens)); if(HIST.pilha.length>200) HIST.pilha.shift(); HIST.refaz=[]; }
+function desfaz(){ if(!HIST.pilha.length) return; HIST.refaz.push(JSON.stringify(E.itens)); E.itens=JSON.parse(HIST.pilha.pop()); E.sel=null; desenha(); salva(); }
+function refaz(){ if(!HIST.refaz.length) return; HIST.pilha.push(JSON.stringify(E.itens)); E.itens=JSON.parse(HIST.refaz.pop()); E.sel=null; desenha(); salva(); }
+const alt=i=>i.h||i.w*ITEM[i.id].proporcao;
+// ponto do desenho (coordenadas do viewBox) -> mundo
+function local2mundo(i,px,py){ const c=ITEM[i.id], vb=c.vb||[100,100*c.proporcao], w=i.w, h=alt(i); let x=(px/vb[0]-0.5)*w, y=(py/vb[1]-0.5)*h; if(i.flip) x=-x;
+  const a=i.rot*Math.PI/180, cs=Math.cos(a), sn=Math.sin(a); return {x:i.x+x*cs-y*sn, y:i.y+x*sn+y*cs}; }
+function dirMundo(i,dx,dy){ const c=ITEM[i.id], vb=c.vb, w=i.w, h=alt(i); let x=dx*w/vb[0], y=dy*h/vb[1]; if(i.flip) x=-x; const a=i.rot*Math.PI/180, n=Math.hypot(x,y)||1; x/=n; y/=n; return {x:x*Math.cos(a)-y*Math.sin(a), y:x*Math.sin(a)+y*Math.cos(a)}; }
+function portas(i){ const h=HID[i.id]; return h?h.portas.map((p,k)=>Object.assign(local2mundo(i,p[0],p[1]),{i,k})):[]; }
+// eixos (ligacao mecanica): ponta do cardan <-> eixo da bomba
+function eixos(i){ const h=HID[i.id]; return h&&h.eixos?h.eixos.map((p,k)=>Object.assign(local2mundo(i,p[0],p[1]),{i,k,eixo:true})):[]; }
+function ligEixos(){ const P=[]; E.itens.forEach(i=>eixos(i).forEach(p=>P.push(p))); const L=[];
+  for(let a=0;a<P.length;a++) for(let b=a+1;b<P.length;b++){ if(P[a].i===P[b].i) continue; if(Math.hypot(P[a].x-P[b].x,P[a].y-P[b].y)<=12) L.push([P[a],P[b]]); } return {P,L}; }
+function acionada(b){ const h=HID[b.id]; if(h.acion!=='pto') return !!estado(b); const {L}=ligEixos();   // bomba de incendio: so gira com um PTO engatado ligado a ela pelo cardan
+  return L.some(([x,y])=>{ const o=x.i===b?y.i:y.i===b?x.i:null; return o&&HID[o.id].tipo==='pto'&&estado(o); }); }
+// ---------- paleta ----------
+// itens que nao entram no menu deste modo didatico (os desenhos continuam em assets/2d)
+const FORA_DO_MENU=new Set(['junta_expansao','valvula_retencao','solenoide_52','painel_solenoides','lubrifil','compressor','mangueira_ar','atuador_pneumatico',
+  'painel_central','painel_cabine','joystick','painel_parachoque','esguicho','fio_eletrico']);
+function monta(){ const grupos={}; CAT.itens.filter(i=>!FORA_DO_MENU.has(i.id)).forEach(i=>(grupos[i.categoria]=grupos[i.categoria]||[]).push(i));
+  $('paleta').innerHTML=Object.keys(grupos).map(g=>'<details open><summary>'+g+'</summary><div class="pal">'+grupos[g].map(i=>'<div class="it" data-id="'+i.id+'" title="'+i.descricao+'"><img src="'+url(i)+'" alt=""><span>'+i.nome+'</span></div>').join('')+'</div></details>').join('');
+  $('paleta').querySelectorAll('.it').forEach(el=>el.addEventListener('pointerdown',e=>arrastaPaleta(e,el.dataset.id)));
+  $('fundo').innerHTML=CAT.fundos.map(f=>'<option value="'+f.id+'">'+f.nome+'</option>').join('')+'<option value="nenhum">Sem fundo (só grade)</option>'; }
+$('busca').oninput=e=>{ const q=e.target.value.toLowerCase(); $('paleta').querySelectorAll('.it').forEach(el=>{ const i=ITEM[el.dataset.id]; el.style.display=(i.nome+' '+i.descricao+' '+i.categoria).toLowerCase().includes(q)?'':'none'; }); };
+// ---------- vista ----------
+function aplicaVista(){ const r=$('palco').getBoundingClientRect(); if(r.width<10) return; $('palco').setAttribute('viewBox',vista.x+' '+vista.y+' '+(r.width/vista.z)+' '+(r.height/vista.z)); selecao(); marcas(); }
+function paraMundo(cx,cy){ const r=$('palco').getBoundingClientRect(); return {x:vista.x+(cx-r.left)/vista.z,y:vista.y+(cy-r.top)/vista.z}; }
+function enquadra(){ const f=CAT.fundos.find(f=>f.id===E.fundo); let x0=0,y0=0,x1=f?f.largura:1000,y1=f?f.altura:500;
+  E.itens.forEach(i=>{ const m=Math.max(i.w,alt(i))/2; x0=Math.min(x0,i.x-m); y0=Math.min(y0,i.y-m); x1=Math.max(x1,i.x+m); y1=Math.max(y1,i.y+m); });
+  const r=$('palco').getBoundingClientRect(); if(r.width<50) return; const z=Math.min(r.width/(x1-x0+80),r.height/(y1-y0+80)); vista.z=z; vista.x=x0-40-((r.width/z)-(x1-x0+80))/2; vista.y=y0-40-((r.height/z)-(y1-y0+80))/2; aplicaVista(); }
+$('palco').addEventListener('wheel',e=>{ e.preventDefault(); const p=paraMundo(e.clientX,e.clientY), k=Math.exp(-e.deltaY*0.0015); vista.z=Math.max(0.15,Math.min(8,vista.z*k));
+  const r=$('palco').getBoundingClientRect(); vista.x=p.x-(e.clientX-r.left)/vista.z; vista.y=p.y-(e.clientY-r.top)/vista.z; aplicaVista(); },{passive:false});
+window.addEventListener('resize',aplicaVista);
+// ---------- desenho ----------
+function fundo(){ const f=CAT.fundos.find(f=>f.id===E.fundo), im=$('fundoImg'); if(f){ im.setAttribute('href',url(f)); im.setAttribute('width',f.largura); im.setAttribute('height',f.altura); im.style.display=''; } else im.style.display='none'; $('fundo').value=E.fundo; }
+function desenha(){ const g=$('itens'); g.innerHTML=''; const rot=$('rotulos').checked;
+  E.itens.forEach(i=>{ const c=ITEM[i.id]; if(!c) return; const h=alt(i), e=document.createElementNS(NS,'g'); e.dataset.uid=i.uid; e.style.cursor=E.tocando?(HID[i.id]&&HID[i.id].clica?'pointer':'default'):'move';
+    e.setAttribute('transform','translate('+i.x+' '+i.y+') rotate('+i.rot+')');
+    const im=document.createElementNS(NS,'image'); im.setAttribute('href',url(c)); im.setAttribute('x',-i.w/2); im.setAttribute('y',-h/2); im.setAttribute('width',i.w); im.setAttribute('height',h); im.setAttribute('preserveAspectRatio','none');
+    if(i.flip) im.setAttribute('transform','scale(-1 1)'); e.appendChild(im);
+    if(rot&&(i.rotulo||c.categoria!=='Tubulação')){ const t=document.createElementNS(NS,'text'); t.setAttribute('class','rot'); t.setAttribute('text-anchor','middle'); t.setAttribute('y',h/2+14); t.setAttribute('transform','rotate('+(-i.rot)+' 0 0)'); t.textContent=i.rotulo||c.nome; e.appendChild(t); }
+    e.addEventListener('pointerdown',ev=>E.tocando?clicaPlay(ev,i):arrastaItem(ev,i)); g.appendChild(e); });
+  selecao(); props(); marcas(); if(E.tocando) resolve(); }
+// alcas: 4 lados (sem proporcao), 4 cantos (com proporcao), girar livre e botoes de giro
+function selecao(){ const g=$('selG'); g.innerHTML=''; if(E.tocando) return; const i=E.itens.find(x=>x.uid===E.sel); if(!i) return; const h=alt(i), w=i.w, z=1/vista.z, m=4*z;
+  const s=document.createElementNS(NS,'g'); s.setAttribute('transform','translate('+i.x+' '+i.y+') rotate('+i.rot+')');
+  let html='<rect x="'+(-w/2-m)+'" y="'+(-h/2-m)+'" width="'+(w+2*m)+'" height="'+(h+2*m)+'" fill="none" stroke="#1e88e5" stroke-width="'+(1.5*z)+'" stroke-dasharray="'+(6*z)+' '+(4*z)+'"/>'+
+    '<line x1="0" y1="'+(-h/2-m)+'" x2="0" y2="'+(-h/2-30*z)+'" stroke="#1e88e5" stroke-width="'+(1.5*z)+'"/>'+
+    '<circle data-h="gira" cx="0" cy="'+(-h/2-30*z)+'" r="'+(7*z)+'" fill="#fff" stroke="#1e88e5" stroke-width="'+(2*z)+'" style="cursor:grab"><title>Arraste para girar</title></circle>';
+  const bt=(dx,sinal,txt)=>'<g data-h="'+sinal+'" style="cursor:pointer" transform="translate('+dx+' '+(-h/2-30*z)+')"><circle r="'+(9*z)+'" fill="#1e88e5"/><text text-anchor="middle" dy="'+(4.5*z)+'" font-size="'+(13*z)+'" font-weight="700" fill="#fff" style="pointer-events:none">'+txt+'</text><title>'+(sinal==='anti'?'Girar anti-horário (15°; Shift: 90°)':'Girar horário (15°; Shift: 90°)')+'</title></g>';
+  html+=bt(-24*z,'anti','↺')+bt(24*z,'hor','↻');
+  for(const sx of [-1,0,1]) for(const sy of [-1,0,1]){ if(!sx&&!sy) continue; const canto=sx&&sy, cx=sx*(w/2+m), cy=sy*(h/2+m), r=(canto?6:5)*z;
+    const cur=canto?((sx*sy>0)?'nwse-resize':'nesw-resize'):(sx?'ew-resize':'ns-resize');
+    html+='<rect data-h="t'+sx+','+sy+'" x="'+(cx-r)+'" y="'+(cy-r)+'" width="'+(2*r)+'" height="'+(2*r)+'" rx="'+(canto?0:2*z)+'" fill="'+(canto?'#1e88e5':'#fff')+'" stroke="#1e88e5" stroke-width="'+(1.5*z)+'" style="cursor:'+cur+'"><title>'+(canto?'Canto: mantém a proporção':'Lado: estica só nesta direção')+'</title></rect>'; }
+  s.innerHTML=html; s.querySelectorAll('[data-h]').forEach(el=>el.addEventListener('pointerdown',ev=>alca(ev,i,el.dataset.h))); g.appendChild(s); }
+// conexoes: bolinha verde = ligada a outra peca; laranja = livre
+function ligacoes(){ const P=[]; E.itens.forEach(i=>portas(i).forEach(p=>P.push(p))); const tol=6, L=[];   // liga bocas praticamente coincidentes (encaixe e tubulacao automatica sao exatos)
+  for(let a=0;a<P.length;a++) for(let b=a+1;b<P.length;b++){ if(P[a].i===P[b].i) continue; if(Math.hypot(P[a].x-P[b].x,P[a].y-P[b].y)<=tol) L.push([P[a],P[b]]); }
+  return {P,L}; }
+function marcas(){ const g=$('marcas'); g.innerHTML=''; if(!$('portas').checked||E.tocando) return; const {P,L}=ligacoes(), lig=new Set(); L.forEach(([a,b])=>{ lig.add(a); lig.add(b); }); const z=1/vista.z;
+  const ex=ligEixos(), le=new Set(); ex.L.forEach(([a,b])=>{ le.add(a); le.add(b); });
+  g.innerHTML=P.map((p,n)=>'<circle data-p="'+n+'" cx="'+p.x+'" cy="'+p.y+'" r="'+(5*z)+'" fill="'+(LIG.a&&LIG.a.i===p.i&&LIG.a.k===p.k?'#1e88e5':lig.has(p)?'#2e7d32':'#ef8a17')+'" stroke="#fff" stroke-width="'+(1.4*z)+'" style="cursor:crosshair"><title>Clique aqui e depois em outra conexão para criar a tubulação</title></circle>').join('')+
+    ex.P.map(p=>'<rect x="'+(p.x-4.5*z)+'" y="'+(p.y-4.5*z)+'" width="'+(9*z)+'" height="'+(9*z)+'" transform="rotate(45 '+p.x+' '+p.y+')" fill="'+(le.has(p)?'#2e7d32':'#7b4fd6')+'" stroke="#fff" stroke-width="'+(1.2*z)+'" pointer-events="none"><title>Eixo (ligação mecânica)</title></rect>').join('');
+  g.querySelectorAll('circle[data-p]').forEach(el=>el.addEventListener('pointerdown',ev=>{ ev.stopPropagation(); ev.preventDefault(); clicaPorta(P[+el.dataset.p]); }));
+  if(LIG.a&&LIG.m) g.insertAdjacentHTML('beforeend','<line x1="'+portas(LIG.a.i)[LIG.a.k].x+'" y1="'+portas(LIG.a.i)[LIG.a.k].y+'" x2="'+LIG.m.x+'" y2="'+LIG.m.y+'" stroke="#1e88e5" stroke-width="'+(2*z)+'" stroke-dasharray="'+(6*z)+' '+(4*z)+'" pointer-events="none"/>'); }
+// ================= LIGAR: clique numa conexao e depois em outra -> tubulacao com retas e curvas de 90 graus =================
+const LIG={a:null,m:null};
+const DIRS={R:[1,0],L:[-1,0],D:[0,1],U:[0,-1]}, OPOSTO={R:'L',L:'R',U:'D',D:'U'};
+function dirDe(v){ return Math.abs(v.x)>=Math.abs(v.y)?(v.x>=0?'R':'L'):(v.y>=0?'D':'U'); }
+function saidaPorta(i,k){ const c=ITEM[i.id], vb=c.vb, q=HID[i.id].portas[k];      // para onde a boca aponta (do centro da peca para a porta)
+  let x=(q[0]/vb[0]-0.5)*i.w, y=(q[1]/vb[1]-0.5)*alt(i); if(Math.abs(x)/i.w>Math.abs(y)/alt(i)) y=0; else x=0; return dirDe(dirMundo(i,x*vb[0]/i.w,y*vb[1]/alt(i))); }
+function clicaPorta(p){ if(!LIG.a){ LIG.a={i:p.i,k:p.k}; marcas(); dica(); return; }
+  if(LIG.a.i===p.i&&LIG.a.k===p.k){ LIG.a=null; marcas(); dica(); return; }
+  const a=LIG.a; LIG.a=null; LIG.m=null; criaTubulacao(a.i,a.k,p.i,p.k); dica(); }
+function rotaOrtogonal(A,dA,B,dB,folga){ const st=(P,d,m)=>({x:P.x+DIRS[d][0]*m,y:P.y+DIRS[d][1]*m});
+  const P1=st(A,dA,folga), Q=st(B,dB,folga), mx=(P1.x+Q.x)/2, my=(P1.y+Q.y)/2, C=[];
+  C.push([A,B]);                                                                     // direto (so vale se alinhado e de frente)
+  C.push([A,P1,{x:P1.x,y:Q.y},Q,B]); C.push([A,P1,{x:Q.x,y:P1.y},Q,B]);
+  C.push([A,P1,{x:mx,y:P1.y},{x:mx,y:Q.y},Q,B]); C.push([A,P1,{x:P1.x,y:my},{x:Q.x,y:my},Q,B]);
+  C.push([A,{x:A.x,y:B.y},B]); C.push([A,{x:B.x,y:A.y},B]);
+  C.push([A,{x:(A.x+B.x)/2,y:A.y},{x:(A.x+B.x)/2,y:B.y},B]); C.push([A,{x:A.x,y:(A.y+B.y)/2},{x:B.x,y:(A.y+B.y)/2},B]);
+  let melhor=null, nota=1e18;
+  for(let c of C){ // limpa pontos repetidos e colineares
+    c=c.filter((p,n)=>!n||Math.hypot(p.x-c[n-1].x,p.y-c[n-1].y)>0.5);
+    for(let n=1;n<c.length-1;){ const a=c[n-1],b=c[n],d=c[n+1]; if((Math.abs(a.x-b.x)<0.5&&Math.abs(b.x-d.x)<0.5)||(Math.abs(a.y-b.y)<0.5&&Math.abs(b.y-d.y)<0.5)) c.splice(n,1); else n++; }
+    if(c.length<2) continue; let ok=true, len=0, ds=[];
+    for(let n=1;n<c.length;n++){ const dx=c[n].x-c[n-1].x, dy=c[n].y-c[n-1].y; if(Math.abs(dx)>0.5&&Math.abs(dy)>0.5){ ok=false; break; } ds.push(dirDe({x:dx,y:dy})); len+=Math.abs(dx)+Math.abs(dy); }
+    if(!ok) continue; if(ds[0]!==dA||ds[ds.length-1]!==OPOSTO[dB]) continue;              // sai pela boca e chega de frente na outra
+    for(let n=1;n<ds.length;n++) if(ds[n]===OPOSTO[ds[n-1]]) ok=false; if(!ok) continue;  // sem voltar para tras
+    // trechos curtos demais para caber as curvas
+    let curto=false; for(let n=1;n<c.length;n++){ const l=Math.abs(c[n].x-c[n-1].x)+Math.abs(c[n].y-c[n-1].y), cur=(n>1?1:0)+(n<c.length-1?1:0); if(l<cur*12-0.5) curto=true; }
+    const apertado=c.slice(1).reduce((s,p,n)=>{ const l=Math.abs(p.x-c[n].x)+Math.abs(p.y-c[n].y); return s+(l<2*PERNA?2*PERNA-l:0); },0);
+    const v=(c.length-2)*1000+len+apertado*8+(curto?1e6:0); if(v<nota){ nota=v; melhor=c; } }
+  return melhor; }
+const PERNA=30, W_CURVA=50;   // curva de 90 graus com largura 50 px: cada perna mede 30 px do canto ate a boca
+function criaTubulacao(i1,k1,i2,k2){ const A=portas(i1)[k1], B=portas(i2)[k2], dA=saidaPorta(i1,k1), dB=saidaPorta(i2,k2);
+  { const v=DIRS[dA], ao=(B.x-A.x)*v[0]+(B.y-A.y)*v[1], lado=Math.abs((B.x-A.x)*v[1]-(B.y-A.y)*v[0]);
+    if(dB===OPOSTO[dA]&&ao>4&&lado<=12){ marca(); const L=Math.hypot(B.x-A.x,B.y-A.y), ang=Math.atan2(B.y-A.y,B.x-A.x)*180/Math.PI;
+      const t={uid:E.uid++,id:'tubo_reto',x:0,y:0,w:L*200/192,h:20,rot:((ang%360)+360)%360,flip:false,rotulo:''}; const pp=portas(t)[0]; t.x+=A.x-pp.x; t.y+=A.y-pp.y;
+      E.itens.push(t); E.sel=null; desenha(); salva(); return; } }
+  let rota=null; for(const f of [PERNA+10,PERNA+30,PERNA*3]){ rota=rotaOrtogonal(A,dA,B,dB,f); if(rota) break; }
+  if(!rota){ alert('Não achei um caminho só com retas e curvas de 90° entre essas duas conexões. Gire ou afaste uma das peças e tente de novo.'); marcas(); return; }
+  marca(); const novos=[];
+  const N=(id,o)=>{ const n=Object.assign({uid:E.uid++,id,x:0,y:0,w:ITEM[id].largura,rot:0,flip:false,rotulo:''},o); novos.push(n); return n; };
+  const RT={R:0,D:90,L:180,U:270};
+  const TAB={'L-D':[0,0],'D-L':[0,1],'U-L':[90,0],'L-U':[90,1],'R-U':[180,0],'U-R':[180,1],'D-R':[270,0],'R-D':[270,1]};
+  const U=rota.length-1, seg=n=>Math.abs(rota[n].x-rota[n-1].x)+Math.abs(rota[n].y-rota[n-1].y), perna=[];
+  for(let n=1;n<U;n++) perna[n]=Math.max(6,Math.min(PERNA,seg(n)*(n===1?1:0.5),seg(n+1)*(n+1===U?1:0.5)));   // curva menor quando o trecho e curto
+  for(let n=1;n<rota.length;n++){ const p=rota[n-1], q=rota[n], d=dirDe({x:q.x-p.x,y:q.y-p.y}), l=Math.abs(q.x-p.x)+Math.abs(q.y-p.y);
+    const ini=n>1?perna[n-1]:0, fim=n<U?perna[n]:0, comp=l-ini-fim;
+    if(comp>1){ const t=N('tubo_reto',{rot:RT[d],w:comp*200/192,h:20}); const s0={x:p.x+DIRS[d][0]*ini,y:p.y+DIRS[d][1]*ini}, pp=portas(t)[0]; t.x+=s0.x-pp.x; t.y+=s0.y-pp.y; }
+    if(n<rota.length-1){ const r=rota[n+1], d2=dirDe({x:r.x-q.x,y:r.y-q.y}), tb=TAB[OPOSTO[d]+'-'+d2]; if(!tb) continue;
+      const cv=N('tubo_curva',{rot:tb[0],w:perna[n]/0.6}); const canto=local2mundo(cv,70,30); cv.x+=q.x-canto.x; cv.y+=q.y-canto.y; } }
+  E.itens.push(...novos); E.sel=null; desenha(); salva(); }
+
+const M=v=>(v/100).toFixed(2);
+function props(){ const i=E.itens.find(x=>x.uid===E.sel), p=$('props'); if(!i||E.tocando){ p.style.display='none'; return; } p.style.display='block';
+  $('pNome').textContent=ITEM[i.id].nome; if(document.activeElement!==$('pRot')) $('pRot').value=i.rotulo||'';
+  for(const [id,v] of [['pX',M(i.x)],['pY',M(i.y)],['pW',M(i.w)],['pH',M(alt(i))],['pR',Math.round(i.rot)]]) if(document.activeElement!==$(id)) $(id).value=v; }
+function mudaProp(f){ const i=E.itens.find(x=>x.uid===E.sel); if(!i) return; marca(); f(i); desenha(); salva(); }
+const giro=(i,d)=>{ i.rot=(((i.rot+d)%360)+360)%360; };
+$('pRot').oninput=e=>{ const i=E.itens.find(x=>x.uid===E.sel); if(i){ i.rotulo=e.target.value; desenha(); salva(); } };
+$('pX').onchange=e=>mudaProp(i=>i.x=+e.target.value*100); $('pY').onchange=e=>mudaProp(i=>i.y=+e.target.value*100);
+$('pW').onchange=e=>mudaProp(i=>{ i.h=alt(i); i.w=Math.max(5,+e.target.value*100); }); $('pH').onchange=e=>mudaProp(i=>i.h=Math.max(5,+e.target.value*100));
+$('pR').onchange=e=>mudaProp(i=>i.rot=((+e.target.value%360)+360)%360);
+$('bAnti').onclick=e=>mudaProp(i=>giro(i,e.shiftKey?-90:-15)); $('bHor').onclick=e=>mudaProp(i=>giro(i,e.shiftKey?90:15));
+$('bEspelha').onclick=()=>mudaProp(i=>i.flip=!i.flip); $('bProp').onclick=()=>mudaProp(i=>{ delete i.h; });
+$('bDup').onclick=()=>duplica(); $('bDel').onclick=()=>exclui();
+$('bFrente').onclick=()=>mudaProp(i=>{ E.itens=E.itens.filter(x=>x!==i); E.itens.push(i); }); $('bTras').onclick=()=>mudaProp(i=>{ E.itens=E.itens.filter(x=>x!==i); E.itens.unshift(i); });
+function duplica(){ const i=E.itens.find(x=>x.uid===E.sel); if(!i) return; marca(); const n=Object.assign({},i,{uid:E.uid++,x:i.x+20,y:i.y+20}); E.itens.push(n); E.sel=n.uid; desenha(); salva(); }
+function exclui(){ if(E.sel==null) return; marca(); E.itens=E.itens.filter(x=>x.uid!==E.sel); E.sel=null; desenha(); salva(); }
+// ---------- arrastar ----------
+const encaixa=v=>$('ima').checked?Math.round(v/10)*10:v;
+function encaixaPortas(i){ if(!$('ima').checked) return; const mine=portas(i); if(!mine.length&&!eixos(i).length) return; let best=null, bd=14/Math.max(0.5,vista.z);
+  E.itens.forEach(o=>{ if(o===i) return; portas(o).forEach(q=>mine.forEach(p=>{ const d=Math.hypot(p.x-q.x,p.y-q.y); if(d<bd){ bd=d; best={dx:q.x-p.x,dy:q.y-p.y}; } }));
+    const me=eixos(i); eixos(o).forEach(q=>me.forEach(p=>{ const d=Math.hypot(p.x-q.x,p.y-q.y); if(d<bd){ bd=d; best={dx:q.x-p.x,dy:q.y-p.y}; } })); });
+  if(best){ i.x+=best.dx; i.y+=best.dy; } }
+function arrastaPaleta(e,id){ e.preventDefault(); const c=ITEM[id], f=$('fantasma'); f.src=url(c); f.style.width=(c.largura*vista.z)+'px'; f.style.display='block';
+  const mv=ev=>{ f.style.left=(ev.clientX-c.largura*vista.z/2)+'px'; f.style.top=(ev.clientY-c.largura*c.proporcao*vista.z/2)+'px'; }; mv(e);
+  const fim=ev=>{ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',fim); f.style.display='none';
+    const r=$('palco').getBoundingClientRect(); if(ev.clientX<r.left||ev.clientX>r.right||ev.clientY<r.top||ev.clientY>r.bottom) return;
+    const p=paraMundo(ev.clientX,ev.clientY); marca(); const n={uid:E.uid++,id,x:encaixa(p.x),y:encaixa(p.y),w:c.largura,rot:0,flip:false,rotulo:''}; encaixaPortas(n); E.itens.push(n); E.sel=n.uid; desenha(); salva(); };
+  window.addEventListener('pointermove',mv); window.addEventListener('pointerup',fim); }
+function arrastaItem(e,i){ e.stopPropagation(); e.preventDefault(); if(E.sel!==i.uid){ E.sel=i.uid; desenha(); }
+  const p0=paraMundo(e.clientX,e.clientY), x0=i.x, y0=i.y; let mexeu=false;
+  const mv=ev=>{ const p=paraMundo(ev.clientX,ev.clientY); if(!mexeu&&Math.hypot(p.x-p0.x,p.y-p0.y)*vista.z>3){ mexeu=true; marca(); }
+    if(mexeu){ i.x=encaixa(x0+p.x-p0.x); i.y=encaixa(y0+p.y-p0.y); encaixaPortas(i); const el=$('itens').querySelector('[data-uid="'+i.uid+'"]'); el.setAttribute('transform','translate('+i.x+' '+i.y+') rotate('+i.rot+')'); selecao(); props(); marcas(); } };
+  const fim=()=>{ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',fim); if(mexeu) salva(); };
+  window.addEventListener('pointermove',mv); window.addEventListener('pointerup',fim); }
+function alca(e,i,tipo){ e.stopPropagation(); e.preventDefault(); marca();
+  if(tipo==='anti'||tipo==='hor'){ giro(i,(tipo==='anti'?-1:1)*(e.shiftKey?90:15)); desenha(); salva(); return; }
+  const a=i.rot*Math.PI/180, cs=Math.cos(a), sn=Math.sin(a), w0=i.w, h0=alt(i);
+  let sx=0, sy=0; if(tipo[0]==='t'){ [sx,sy]=tipo.slice(1).split(',').map(Number); }
+  const anc={x:i.x+(-sx*w0/2)*cs-(-sy*h0/2)*sn, y:i.y+(-sx*w0/2)*sn+(-sy*h0/2)*cs};   // lado/canto oposto fica parado
+  const mv=ev=>{ const p=paraMundo(ev.clientX,ev.clientY);
+    if(tipo==='gira'){ let ang=Math.atan2(p.y-i.y,p.x-i.x)*180/Math.PI+90; if($('ima').checked||ev.shiftKey) ang=Math.round(ang/15)*15; i.rot=((ang%360)+360)%360; desenha(); return; }
+    const dx=(p.x-anc.x)*cs+(p.y-anc.y)*sn, dy=-(p.x-anc.x)*sn+(p.y-anc.y)*cs;    // ponteiro no referencial da peca
+    let w=w0, h=h0;
+    if(sx&&sy){ const k=Math.max(0.05,Math.max(sx*dx/w0,sy*dy/h0)); w=w0*k; h=h0*k; }   // canto: mantem a proporcao
+    else if(sx) w=Math.max(6,encaixa(sx*dx)); else h=Math.max(6,encaixa(sy*dy));
+    i.w=w; i.h=h; const cxL=sx*w/2, cyL=sy*h/2; i.x=anc.x+cxL*cs-cyL*sn; i.y=anc.y+cxL*sn+cyL*cs; desenha(); };
+  const fim=()=>{ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',fim); salva(); };
+  window.addEventListener('pointermove',mv); window.addEventListener('pointerup',fim); }
+$('palco').addEventListener('pointermove',e=>{ if(LIG.a){ LIG.m=paraMundo(e.clientX,e.clientY); marcas(); } });
+$('palco').addEventListener('pointerdown',e=>{ if(LIG.a&&!e.target.closest('#marcas circle')){ LIG.a=null; LIG.m=null; marcas(); dica(); } if(e.target.closest('#itens g,#selG [data-h]')) return; if(!E.tocando){ E.sel=null; desenha(); }
+  const c0={x:e.clientX,y:e.clientY}, v0={x:vista.x,y:vista.y}; $('palco').style.cursor='grabbing';
+  const mv=ev=>{ vista.x=v0.x-(ev.clientX-c0.x)/vista.z; vista.y=v0.y-(ev.clientY-c0.y)/vista.z; aplicaVista(); };
+  const fim=()=>{ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',fim); $('palco').style.cursor=''; };
+  window.addEventListener('pointermove',mv); window.addEventListener('pointerup',fim); });
+// ================= PLAY: simulacao da agua no esquema montado =================
+// Grafo: portas das pecas ligadas por proximidade + caminho interno de cada peca (valvula so se aberta, retencao
+// so num sentido). A agua parte das fontes (tanques, hidrante aberto, manancial pelo mangote com a bomba ligada) e
+// avanca ~3 m/s. Bomba ligada com agua na entrada pressuriza a saida; expedicao com agua pressurizada lanca o jato.
+// Ponta de tubo livre com pressao jorra. Clique nas valvulas, bombas e hidrante para atuar.
+const V_AGUA=300; // px/s
+const SIM={t:0,ultimo:0,molhado:new Map(),arestas:[],jatos:[],vaz:[],msg:[],escorvado:new Set(),escT:{},escLig:new Map()};
+function estado(i){ if(i.estado===undefined) i.estado=(HID[i.id].tipo==='fonte'&&HID[i.id].clica)?1:0; return i.estado; }
+function resolve(){ const {P,L}=ligacoes(), key=p=>p.i.uid+':'+p.k, adj=new Map(), add=(a,b,len,dir,pts,dono)=>{ (adj.get(key(a))||adj.set(key(a),[]).get(key(a))).push({b,len,dir,pts,dono}); };
+  const porKey=new Map(P.map(p=>[key(p),p]));
+  L.forEach(([a,b])=>{ add(a,b,0); add(b,a,0); });
+  E.itens.forEach(i=>{ const h=HID[i.id]; if(!h) return; const ps=portas(i); if(ps.length<2) return; const t=h.tipo, ab=estado(i);
+    const passa=(t==='passa'||t==='mangote'||t==='bomba'||(t==='valvula'&&ab)||t==='retencao'||(t==='fonte'));
+    if(!passa) return;
+    for(let a=0;a<ps.length;a++) for(let b=0;b<ps.length;b++){ if(a===b) continue; if(t==='retencao'&&!(a===0&&b===1)) continue; if(t==='fonte') continue;
+      if(i.id==='ada_proporcionador'&&b===2) continue;                              // nada sai pela entrada de LGE do ADA
+      const vk=(h.vias||{})[Math.min(a,b)+'-'+Math.max(a,b)]||[], meio=vk.map(q=>local2mundo(i,q[0],q[1])); if(a>b) meio.reverse();
+      const pts=[ps[a],...meio,ps[b]]; let len=0; for(let k=1;k<pts.length;k++) len+=Math.hypot(pts[k].x-pts[k-1].x,pts[k].y-pts[k-1].y);
+      const tipoAr=t==='bomba'&&a===1?'reverso':i.id==='bypass'?'alivio':(i.id==='ada_proporcionador'&&a===2)?'venturi':null;
+      add(ps[a],ps[b],len,tipoAr,pts,t==='bomba'&&a===0?i:null); } });
+  // fontes
+  const fontes=[];
+  E.itens.forEach(i=>{ const h=HID[i.id]; if(!h) return; if(h.tipo==='fonte'&&(!h.clica||estado(i))) portas(i).forEach(p=>{ if(h.entradas&&h.entradas.includes(p.k)) return; fontes.push({p,cor:h.agua,pressao:!!h.pressao,nivel:h.pressao?-1e9:i.y-alt(i)/2}); });
+    if(h.tipo==='mangote'){ const ralo=portas(i)[1]; const man=E.itens.find(o=>o.id==='manancial'&&Math.abs(ralo.x-o.x)<=o.w/2&&Math.abs(ralo.y-o.y)<=alt(o)/2); if(man) fontes.push({p:ralo,cor:'agua',manancial:true,nivel:-1e9,m:i}); } });
+  const bombas=E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='bomba'&&acionada(i));
+  // propagacao (Dijkstra no tempo); a agua do manancial so sobe se houver bomba ligada alcancavel
+  const agora=SIM.t, tempo=new Map(), cor=new Map(), bombasOn=new Set(bombas);
+  SIM.escLig=new Map(); SIM.semEscorva=[];
+  const fontesOk=fontes.filter(f=>{ if(!f.manancial) return true; // precisa de bomba ligada no caminho e da linha escorvada
+      const vis=new Set([key(f.p)]), q=[key(f.p)]; while(q.length){ const u=q.shift(); for(const e of (adj.get(u)||[])){ const kb=key(e.b); if(vis.has(kb)) continue; vis.add(kb); q.push(kb); } }
+      const escs=E.itens.filter(o=>HID[o.id]&&HID[o.id].tipo==='escorva'&&portas(o).some(p=>vis.has(key(p))));
+      // didatico: a escorva so enche o tubo ate a bomba se estiver ACIMA da admissao da bomba
+      const adms=E.itens.filter(b=>HID[b.id]&&HID[b.id].tipo==='bomba'&&vis.has(key(portas(b)[0]))).map(b=>portas(b)[0].y);
+      const yAdm=adms.length?Math.min(...adms):1e9; escs.forEach(o=>{ o.abaixo=portas(o)[0].y>yAdm+2; });
+      SIM.escLig.set(f.m.uid,escs);
+      const temBomba=bombas.some(b=>portas(b).some(p=>vis.has(key(p))));
+      if(temBomba&&!SIM.escorvado.has(f.m.uid)) SIM.semEscorva.push(f.m);
+      return temBomba&&SIM.escorvado.has(f.m.uid); });
+  // Dijkstra por cor (agua / LGE) com fila de prioridade; rotulo = (tempo, nivel). Um novo rotulo so entra se chega
+  // antes ou com nivel menos restrito (passou por bomba girando) - numero finito de rotulos por porta.
+  const heap=[], push=x=>{ heap.push(x); let k=heap.length-1; while(k){ const p=(k-1)>>1; if(heap[p][1]<=heap[k][1]) break; [heap[p],heap[k]]=[heap[k],heap[p]]; k=p; } },
+    pop=()=>{ const top=heap[0], last=heap.pop(); if(heap.length){ heap[0]=last; let k=0; for(;;){ const a=2*k+1,b=a+1; let m=k; if(a<heap.length&&heap[a][1]<heap[m][1]) m=a; if(b<heap.length&&heap[b][1]<heap[m][1]) m=b; if(m===k) break; [heap[m],heap[k]]=[heap[k],heap[m]]; k=m; } } return top; };
+  let tA=new Map(), nA=new Map();
+  for(const c of ['agua','lge']){ const melhorT=new Map(), melhorN=new Map(), fs=fontesOk.filter(f=>f.cor===c); if(!fs.length) continue;
+    fs.forEach(f=>{ const k=key(f.p), t0=SIM.molhado.has(k)?SIM.molhado.get(k):agora; push([k,t0,f.nivel]); melhorT.set(k,Math.min(melhorT.get(k)??1e9,t0)); melhorN.set(k,Math.min(melhorN.get(k)??1e9,f.nivel)); });
+    let guarda=0; while(heap.length&&guarda++<50000){ const [u,tu,nv]=pop(); if(tu>(melhorT.get(u)??1e9)+1e-6&&nv>(melhorN.get(u)??1e9)) continue;
+      for(const e of (adj.get(u)||[])){ const kb=key(e.b), pb=porKey.get(kb); let nv2=(e.dono&&bombasOn.has(e.dono))?-1e9:nv;
+        if(e.dir==='alivio') continue;                                                 // bypass: so recirculacao (desenhada a parte)
+        if(e.dir==='venturi'){ if(c!=='lge'||!((nA.get(kb)??1e9)<=-1e8)) continue; nv2=-1e9; }   // LGE so e aspirado com agua pressurizada passando no ADA
+        else if(c==='lge'&&nv<=-1e8){ if(e.dir==='reverso') continue; const ta=tA.get(u), tb0=tA.get(kb); if(ta===undefined||tb0===undefined||tb0<ta-1e-6) continue; }   // mistura so segue o sentido da agua
+        if(pb&&pb.y<nv2-2) continue;                                                   // sem pressao nao sobe acima do nivel da fonte
+        const ant=SIM.molhado.get(kb); let tb=tu+e.len/V_AGUA; if(ant===undefined&&tb<agora) tb=agora+e.len/V_AGUA;
+        const bt=melhorT.get(kb)??1e9, bn=melhorN.get(kb)??1e9;
+        if(tb<bt-1e-6||nv2<bn-1){ if(tb<bt) melhorT.set(kb,tb); if(nv2<bn) melhorN.set(kb,nv2); push([kb,tb,nv2]); } } }
+    if(c==='agua'){ tA=new Map(melhorT); nA=new Map(melhorN); }
+    for(const [k,t] of melhorT){ tempo.set(k,Math.min(tempo.get(k)??1e9,t)); (cor.get(k)||cor.set(k,new Set()).get(k)).add(c); } }
+  SIM.molhado=tempo; SIM.cor=cor;
+  E.itens.forEach(m=>{ if(m.id==='mangote_ralo'&&!SIM.escorvado.has(m.uid)&&tempo.has(m.uid+':0')){ SIM.escorvado.add(m.uid); SIM.reResolve=true; } });
+  // pressao: saidas das bombas ligadas com agua na entrada + fontes com pressao; propaga sem voltar pela bomba
+  const pres=new Set(), q=[];
+  bombas.forEach(b=>{ const ps=portas(b); if(tempo.has(key(ps[0]))) { pres.add(key(ps[1])); q.push(key(ps[1])); } });
+  fontesOk.filter(f=>f.pressao).forEach(f=>{ pres.add(key(f.p)); q.push(key(f.p)); });
+  while(q.length){ const u=q.shift(); for(const e of (adj.get(u)||[])){ if(e.dir==='reverso'||e.dir==='alivio'||e.dir==='venturi') continue; const kb=key(e.b); if(pres.has(kb)||!tempo.has(kb)) continue; pres.add(kb); q.push(kb); } }
+  SIM.pres=pres;
+  // arestas molhadas para desenhar
+  SIM.arestas=[]; const vistas=new Set();
+  for(const [u,lst] of adj){ for(const e of lst){ const kb=key(e.b); if(!tempo.has(u)||!tempo.has(kb)||e.len===0) continue;
+      if(e.dir==='alivio'&&!pres.has(u)) continue;                                   // bypass: so aparece recirculando, do lado com pressao para a succao const id=[u,kb].sort().join('|'); if(vistas.has(id)) continue; vistas.add(id);
+      const pa=porKey.get(u), pb=porKey.get(kb), alv=e.dir==='alivio'; let [ini,fim,ti,tf]=(alv||tempo.get(u)<=tempo.get(kb))?[pa,pb,tempo.get(u),tempo.get(kb)]:[pb,pa,tempo.get(kb),tempo.get(u)];
+      if(alv){ ti=Math.max(tempo.get(u),tempo.get(kb)); tf=ti+e.len/V_AGUA; }       // recirculacao: da descarga para a succao
+      const inv=!alv&&tempo.get(u)>tempo.get(kb), pts=e.pts?(inv?e.pts.slice().reverse():e.pts):[ini,fim];
+      const cs=new Set([...(cor.get(u)||[]),...(cor.get(kb)||[])]); SIM.arestas.push({pts,ini,fim,ti,tf:Math.max(tf,ti+0.05),cor:cs.has('lge')?(cs.has('agua')?'#3fae4a':'#e0b000'):'#2f8fe0',fluxo:(pres.has(u)&&pres.has(kb))||e.dir==='alivio',i:pa.i}); } }
+  // jatos nas expedicoes e vazamentos nas pontas livres
+  SIM.jatos=[]; SIM.vaz=[]; const ligadas=new Set(); L.forEach(([a,b])=>{ ligadas.add(key(a)); ligadas.add(key(b)); });
+  E.itens.forEach(i=>{ const h=HID[i.id]; if(!h) return; const ps=portas(i);
+    if(h.tipo==='saida'){ const k=key(ps[0]); if(tempo.has(k)) SIM.jatos.push({i,t:tempo.get(k)+0.15,forte:pres.has(k),cor:[...(cor.get(k)||[])]}); }
+    else if(h.tipo!=='escorva') ps.forEach(p=>{ const k=key(p); if(ligadas.has(k)||!tempo.has(k)||h.tipo==='fonte') return; if(h.tipo==='mangote'&&p.k===1) return; SIM.vaz.push({p,t:tempo.get(k),forte:pres.has(k),cor:[...(cor.get(k)||[])]}); }); });
+  painelEstado(bombas,fontesOk); }
+function painelEstado(bombas,fontes){ const L=[];
+  if(!fontes.length) L.push('<li class="mut">Nenhuma fonte de água: coloque um tanque de água, um hidrante ou o manancial com o mangote (o ralo dentro do manancial).</li>');
+  const jat=SIM.jatos.filter(j=>j.t<=SIM.t+0.01);
+  E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='saida').forEach(i=>{ const j=SIM.jatos.find(x=>x.i===i), nome=i.rotulo||ITEM[i.id].nome;
+    L.push(!j?'<li class="mut">'+nome+': sem água</li>':j.t>SIM.t?'<li>'+nome+': água a caminho…</li>':j.forte?'<li class="ok">'+nome+': recebendo água com pressão ✓</li>':'<li>'+nome+': água chegou, mas sem pressão (engate o PTO / ligue a bomba)</li>'); });
+  // bomba ligada com a entrada seca: diz por que (acima do nivel do tanque = nao puxa sozinha)
+  const tanques=E.itens.filter(i=>i.id==='tanque_agua'), topo=tanques.length?Math.min(...tanques.map(i=>i.y-alt(i)/2)):null;
+  E.itens.filter(b=>HID[b.id]&&HID[b.id].tipo==='bomba'&&acionada(b)).forEach(b=>{ const ent=portas(b)[0]; if(SIM.molhado.has(b.uid+':0')) return; const nome=b.rotulo||ITEM[b.id].nome;
+    L.push('<li style="color:#b71c1c">'+nome+' ligada, mas sem água na entrada'+(topo!==null&&ent.y<topo-2?': a entrada está <b>acima do nível do tanque</b> e a bomba não puxa a água sozinha. Coloque a bomba abaixo do tanque.':': verifique a ligação e as válvulas até ela.')+'</li>'); });
+  E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='escorva').forEach(o=>{ if(estado(o)) L.push('<li>Escorva ligada: '+Math.floor(o.tEsc||0)+' s (máx. 30 s)'+(![...SIM.escLig.values()].some(a=>a.includes(o))?' — <b>não está ligada à linha do manancial</b>':o.abaixo?' — <b style="color:#b71c1c">está abaixo da admissão da bomba: não consegue encher o tubo até a bomba. Coloque a escorva acima da admissão.</b>':'')+'</li>'); else if(o.limite) L.push('<li style="color:#b71c1c">Escorva desligou no limite de 30 s.</li>'); });
+  (SIM.semEscorva||[]).forEach(m=>L.push('<li style="color:#b71c1c">Manancial: bomba girando sem escorva — a água não sobe. Ligue a escorva (ligada à sucção) ou encha a linha com água do tanque.</li>'));
+  E.itens.filter(m=>m.id==='mangote_ralo'&&SIM.escorvado.has(m.uid)).forEach(()=>L.push('<li class="ok">Linha do manancial escorvada ✓</li>'));
+  E.itens.filter(i=>HID[i.id]&&HID[i.id].entradas).forEach(i=>{ const nome=i.rotulo||ITEM[i.id].nome;
+    HID[i.id].entradas.forEach(k=>{ const key=i.uid+':'+k; if(SIM.pres&&SIM.pres.has(key)&&SIM.molhado.has(key)&&SIM.molhado.get(key)<=SIM.t) L.push('<li class="ok">'+nome+': abastecendo pela entrada '+(k===1?'da tampa':k===2?'lateral esquerda':'lateral direita')+' ✓</li>'); }); });
+  if(SIM.vaz.some(v=>v.t<=SIM.t&&v.forte)) L.push('<li style="color:#b71c1c;font-weight:700">Água jorrando por ponta de tubo aberta (conexão faltando)</li>');
+  const ptos=E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='pto'), ex=ligEixos();
+  E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='bomba').forEach(b=>{ const nome=b.rotulo||ITEM[b.id].nome; if(acionada(b)) return;
+    if(HID[b.id].acion!=='pto') L.push('<li class="mut">'+nome+' desligada: clique nela para ligar.</li>');
+    else if(!ptos.length) L.push('<li class="mut">'+nome+' sem acionamento: coloque o PTO e cardan e encaixe a ponta do cardan no eixo da bomba (losango).</li>');
+    else if(!ex.L.some(([x,y])=>(x.i===b||y.i===b))) L.push('<li class="mut">'+nome+' parada: o cardan não está ligado ao eixo dela (losangos roxos).</li>');
+    else L.push('<li class="mut">'+nome+' parada: clique no PTO para engatar.</li>'); });
+  ptos.forEach(p=>{ if(estado(p)&&!ex.L.some(([x,y])=>x.i===p||y.i===p)) L.push('<li class="mut">PTO engatado, mas o cardan não está ligado a nenhuma bomba.</li>'); });
+  $('estTxt').innerHTML='<ul>'+L.join('')+'</ul><p class="mut" style="margin:6px 0 0">Clique nas válvulas e no hidrante para abrir/fechar, e no PTO para engatar (a bomba de incêndio gira pelo cardan).</p>'; }
+function clicaPlay(e,i){ e.stopPropagation(); e.preventDefault(); const h=HID[i.id]; if(!h||!h.clica) return; i.estado=estado(i)?0:1; if(h.tipo==='escorva'){ i.tEsc=0; i.limite=false; } resolve(); }
+function animaPlay(ts){ if(!E.tocando) return; const dt=Math.max(0,Math.min(0.1,(ts-(SIM.ultimo||ts))/1000)); SIM.ultimo=ts; SIM.t+=dt; const t=SIM.t, z=1/vista.z, g=$('agua');
+  { let mudou=!!SIM.reResolve; SIM.reResolve=false;
+    for(const i of E.itens){ if(HID[i.id]&&HID[i.id].tipo==='escorva'){ if(estado(i)){ i.tEsc=(i.tEsc||0)+dt; if(i.tEsc>=30){ i.estado=0; i.limite=true; mudou=true; } } else i.tEsc=0; } }
+    for(const [m,escs] of SIM.escLig){ if(SIM.escorvado.has(m)) continue; if(escs.some(o=>estado(o)&&!o.abaixo)){ SIM.escT[m]=(SIM.escT[m]||0)+dt; if(SIM.escT[m]>=3){ SIM.escorvado.add(m); escs.forEach(o=>{ if(!o.abaixo){ o.estado=0; o.tEsc=0; } }); mudou=true; }  } }
+    if(mudou) resolve(); }
+  let html='';
+  for(const a of SIM.arestas){ if(t<=a.ti) continue; const f=Math.min(1,(t-a.ti)/(a.tf-a.ti)), P=a.pts;
+    let tot=0; for(let k=1;k<P.length;k++) tot+=Math.hypot(P[k].x-P[k-1].x,P[k].y-P[k-1].y); let resta=tot*f, d='M'+P[0].x+' '+P[0].y;
+    for(let k=1;k<P.length&&resta>0;k++){ const sl=Math.hypot(P[k].x-P[k-1].x,P[k].y-P[k-1].y), u=Math.min(1,resta/(sl||1)); d+=' L'+(P[k-1].x+(P[k].x-P[k-1].x)*u)+' '+(P[k-1].y+(P[k].y-P[k-1].y)*u); resta-=sl; }
+    html+='<path d="'+d+'" fill="none" stroke="'+a.cor+'" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>';
+    if(a.fluxo&&f>=1) html+='<path d="'+d+'" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 12" stroke-dashoffset="'+(-(t*60)%18)+'" opacity=".9"/>'; }
+  // jatos
+  for(const j of SIM.jatos){ if(t<j.t) continue; const h=HID[j.i.id], b=local2mundo(j.i,h.bico[0],h.bico[1]), d=dirMundo(j.i,h.bico[2],h.bico[3]), alc=h.alc*(j.forte?1:0.25)*Math.min(1,(t-j.t)*2), cor=j.cor.includes('lge')?(j.cor.includes('agua')?'#3fae4a':'#e0b000'):'#2f8fe0';
+    for(let k=0;k<(h.leque||h.cortina?7:5);k++){ const ab=h.leque?(k-3)*0.22:h.cortina?0:(k-2)*0.04, cs=Math.cos(ab), sn=Math.sin(ab), dx=d.x*cs-d.y*sn, dy=d.x*sn+d.y*cs;
+      const ox=h.cortina?(k-3)*j.i.w*0.12:0, L=alc*(0.85+0.15*Math.sin(k*1.7)), ex=b.x+ox+dx*L, ey=b.y+dy*L+(h.cortina?0:L*(j.forte?0.75:1.4)), mx=b.x+ox+dx*L*0.6, my=b.y+dy*L*0.6;   // parabola: sobe na direcao do bico e cai
+      html+='<path d="M'+(b.x+ox)+' '+b.y+' Q'+mx+' '+my+' '+ex+' '+ey+'" fill="none" stroke="'+cor+'" stroke-width="'+(j.forte?3:2)+'" stroke-dasharray="4 7" stroke-dashoffset="'+(-(t*90+k*5)%11)+'" opacity=".85"/>'; } }
+  for(const v of SIM.vaz){ if(t<v.t) continue; const i=v.p.i, dx=v.p.x-i.x, dy=v.p.y-i.y, n=Math.hypot(dx,dy)||1, L=v.forte?45:12, cor=v.cor.includes('lge')?'#e0b000':'#2f8fe0';
+    for(let k=-1;k<=1;k++) html+='<path d="M'+v.p.x+' '+v.p.y+' q'+(dx/n*L*0.6+k*6)+' '+(dy/n*L*0.6)+' '+(dx/n*L+k*12)+' '+(dy/n*L+L*0.8)+'" fill="none" stroke="'+cor+'" stroke-width="2.5" stroke-dasharray="3 6" stroke-dashoffset="'+(-(t*80)%9)+'"/>'; }
+  // cardan girando e rotor da bomba
+  for(const i of E.itens){ const h=HID[i.id]; if(!h) continue;
+    if(h.tipo==='pto'&&estado(i)){ const a=local2mundo(i,52,35), b=local2mundo(i,150,35); html+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="#fff" stroke-width="3" stroke-dasharray="3 5" stroke-dashoffset="'+(-(t*120)%8)+'"/>'; }
+    if(h.tipo==='bomba'&&acionada(i)){ const c=local2mundo(i,60,60), r=i.w*0.1, ang=t*900; let d=''; for(let k=0;k<3;k++){ const q=(ang+k*120)*Math.PI/180; d+='M'+c.x+' '+c.y+' L'+(c.x+Math.cos(q)*r)+' '+(c.y+Math.sin(q)*r)+' '; }
+      html+='<path d="'+d+'" stroke="#1d2733" stroke-width="2.5" stroke-linecap="round"/>';
+      if(h.acion==='pto'){ const y=i.y-alt(i)/2-8; html+='<g transform="translate('+i.x+' '+y+')"><rect x="-30" y="-11" width="60" height="15" rx="7" fill="#2e7d32"/><text class="badge" text-anchor="middle" y="0" fill="#fff">GIRANDO</text></g>'; } }
+    else if(h.tipo==='bomba'&&h.acion==='pto'){ const y=i.y-alt(i)/2-8; html+='<g transform="translate('+i.x+' '+y+')"><rect x="-28" y="-11" width="56" height="15" rx="7" fill="#6b7785"/><text class="badge" text-anchor="middle" y="0" fill="#fff">PARADA</text></g>'; } }
+  // etiquetas de estado nas pecas clicaveis
+  for(const i of E.itens){ const h=HID[i.id]; if(!h||!h.clica) continue; const ab=estado(i), txt=(NOME_EST[h.tipo]||['FECHADA','ABERTA'])[ab], y=i.y-alt(i)/2-8, lw=h.tipo==='pto'?46:34;
+    html+='<g transform="translate('+i.x+' '+y+')"><rect x="'+(-lw)+'" y="-11" width="'+(2*lw)+'" height="15" rx="7" fill="'+(ab?'#2e7d32':'#b71c1c')+'"/><text class="badge" text-anchor="middle" y="0" fill="#fff">'+txt+'</text></g>'; }
+  g.innerHTML=html; if(Math.floor(t*4)!==Math.floor((t-dt)*4)) painelEstado(E.itens.filter(i=>HID[i.id]&&HID[i.id].tipo==='bomba'&&acionada(i)),[1]);
+  requestAnimationFrame(animaPlay); }
+function setPlay(on){ E.tocando=on; document.body.classList.toggle('tocando',on); $('play').classList.toggle('on',on); $('play').textContent=on?'■ Parar':'▶ Play';
+  $('estado').style.display=on?'block':'none'; $('agua').innerHTML=''; SIM.t=0; SIM.ultimo=0; SIM.molhado=new Map(); SIM.escorvado=new Set(); SIM.escT={}; E.itens.forEach(i=>{ i.tEsc=0; i.limite=false; if(HID[i.id]&&HID[i.id].tipo==='escorva') i.estado=0; });
+  if(on){ E.sel=null; resolve(); requestAnimationFrame(animaPlay); } desenha(); dica(); }
+function dica(){ $('dica').textContent=E.tocando?'PLAY: clique nas válvulas, no PTO, na bomba elétrica e no hidrante para atuar · a água avança pelas peças ligadas (bolinhas verdes no modo edição) · ■ Parar volta à edição'
+  :LIG.a?'LIGAR: agora clique na outra conexão (bolinha) para criar a tubulação · Esc ou clique no vazio cancela':'Clique numa bolinha e depois em outra para criar a tubulação · arraste itens do menu · alças: lados esticam, cantos mantêm a proporção, ↺ ↻ giram · encaixe automático nas conexões (bolinhas) · Del exclui · Ctrl+D duplica · ▶ Play simula a água'; }
+$('play').onclick=()=>setPlay(!E.tocando);
+// ---------- teclado e barra ----------
+window.addEventListener('keydown',e=>{ if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||E.tocando) return; const ctl=e.ctrlKey||e.metaKey, k=e.key.toLowerCase();
+  if(k==='escape'&&LIG.a){ LIG.a=null; LIG.m=null; marcas(); dica(); return; }
+  if(ctl&&k==='z'){ e.preventDefault(); e.shiftKey?refaz():desfaz(); return; } if(ctl&&k==='y'){ e.preventDefault(); refaz(); return; }
+  if(ctl&&k==='d'){ e.preventDefault(); duplica(); return; }
+  const i=E.itens.find(x=>x.uid===E.sel); if(!i) return;
+  if(k==='delete'||k==='backspace'){ e.preventDefault(); exclui(); }
+  else if(k==='r'){ mudaProp(i=>giro(i,e.shiftKey?-15:15)); }
+  else if(k==='f'){ mudaProp(i=>i.flip=!i.flip); }
+  else if(k==='escape'){ E.sel=null; desenha(); }
+  else if(k.startsWith('arrow')){ e.preventDefault(); const d=e.shiftKey?10:1; mudaProp(i=>{ if(k==='arrowleft') i.x-=d; if(k==='arrowright') i.x+=d; if(k==='arrowup') i.y-=d; if(k==='arrowdown') i.y+=d; }); } });
+$('fundo').onchange=e=>{ E.fundo=e.target.value; fundo(); salva(); };
+$('grade').onchange=e=>{ $('gradeR').style.display=e.target.checked?'':'none'; };
+$('rotulos').onchange=desenha; $('portas').onchange=marcas; $('desfaz').onclick=desfaz; $('refaz').onclick=refaz; $('ajusta').onclick=enquadra; $('imprime').onclick=()=>window.print();
+$('limpa').onclick=()=>{ if(!E.itens.length||!confirm('Apagar todos os itens do esquema?')) return; marca(); E.itens=[]; E.sel=null; desenha(); salva(); };
+$('exporta').onclick=()=>{ const b=new Blob([JSON.stringify({versao:2,fundo:E.fundo,itens:E.itens},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='esquema_superestrutura.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); };
+$('importa').onclick=()=>$('arq').click();
+$('arq').onchange=e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const d=JSON.parse(t); if(!Array.isArray(d.itens)) throw 0; marca(); E.itens=d.itens.filter(i=>ITEM[i.id]); E.fundo=d.fundo||'lateral'; E.uid=1+Math.max(0,...E.itens.map(i=>i.uid||0)); E.sel=null; fundo(); desenha(); salva(); enquadra(); }).catch(()=>alert('Arquivo de esquema inválido.')); e.target.value=''; };
+// ---------- sistema completo (o mesmo do simulador 3D), montado e ligado ----------
+function montaCompleto(){ const L0=[]; let uid=1;
+  const N=(id,o={})=>{ const c=ITEM[id], i={uid:uid++,id,x:0,y:0,w:o.w||c.largura,rot:o.rot||0,flip:!!o.flip,rotulo:o.nome||''}; if(o.h) i.h=o.h; L0.push(i); return i; };
+  const P=(i,k)=>portas(i)[k];
+  const liga=(i,k,ref,kr)=>{ const a=P(ref,kr), b=P(i,k); i.x+=a.x-b.x; i.y+=a.y-b.y; return i; };
+  const RT={R:0,D:90,L:180,U:270};
+  const tubo=(ref,kr,dir,len)=>{ const t=N('tubo_reto',{rot:RT[dir],w:Math.max(4,len)*200/192,h:20}); return liga(t,0,ref,kr); };       // porta 0 na referencia, porta 1 na ponta
+  const ate=(ref,kr,dir,alvo)=>{ const a=P(ref,kr); return tubo(ref,kr,dir,Math.abs((dir==='R'||dir==='L'?a.x:a.y)-alvo)); };
+  const curva=(ref,kr,de,para)=>{ // de: lado por onde a agua entra; para: lado por onde sai
+    const tab={'L-D':[0,0,1],'D-L':[0,1,0],'U-L':[90,0,1],'L-U':[90,1,0],'R-U':[180,0,1],'U-R':[180,1,0],'D-R':[270,0,1],'R-D':[270,1,0]}[de+'-'+para];
+    const c=N('tubo_curva',{rot:tab[0]}); liga(c,tab[1],ref,kr); c._s=tab[2]; return c; };
+  const te=(ref,kr,rot,kEntra)=>liga(N('tubo_te',{rot}),kEntra,ref,kr);     // rot 0: esq/dir + baixo; 90: cima/baixo + esq; 180: + cima; 270: + dir
+  // ---- tanque e saida ----
+  const tq=N('tanque_agua'); tq.x=730; tq.y=150;
+  let t=tubo(tq,0,'D',26);
+  const te1=te(t,1,270,1);                                   // cima(1)/baixo(0) + direita(2)
+  // admissao + hidrante (para tras)
+  t=tubo(te1,2,'R',34); const adm=liga(N('admissao',{nome:'Admissão'}),0,t,1); const hid=liga(N('hidrante'),1,adm,1);
+  // descida e linha de succao do tanque para a bomba
+  let c=curva(te1,0,'U','L'); t=tubo(c,c._s,'L',30);
+  const teI=te(t,1,180,0);                                   // ramal para cima: bomba eletrica do inundador
+  t=tubo(teI,1,'L',24); const vtb=liga(N('valvula_borboleta_pneu',{nome:'Válvula tanque-bomba'}),1,t,1);
+  t=tubo(vtb,0,'L',40); const te2=te(t,1,0,1);                // ramal para baixo: succao de manancial
+  // succao de manancial
+  const ves=liga(N('valvula_esferica',{rot:90,nome:'Esférica da sucção'}),0,te2,2); t=tubo(ves,1,'D',22);
+  const mg=liga(N('mangote_ralo',{w:70}),0,t,1); const ralo=P(mg,1); const man=N('manancial',{w:240}); man.x=ralo.x-40; man.y=ralo.y+18;
+  // bomba e PTO
+  t=tubo(te2,0,'L',12); const teE=te(t,1,180,0); const esc=liga(N('bomba_escorva',{w:34}),0,teE,2); t=tubo(teE,1,'L',12); const bo=liga(N('bomba_incendio',{flip:true,w:70}),0,t,1);
+  const pto=N('pto_cardan',{rot:270,w:70}); { const a=eixos(bo)[0], b=eixos(pto)[0]; pto.x+=a.x-b.x; pto.y+=a.y-b.y; }
+  // recalque: ADA, junta, retorno e canhao de teto
+  t=tubo(bo,1,'U',16); const ada=liga(N('ada_proporcionador',{w:44}),1,t,1);
+  const vl=liga(N('valvula_lge',{nome:'Válvula de LGE'}),0,ada,2); t=tubo(vl,1,'R',16); c=curva(t,1,'L','U'); t=tubo(c,c._s,'U',36); const tl=liga(N('tanque_lge'),0,t,1);
+  const jt=tubo(ada,0,'U',42);                              // (junta de expansao fora do modo didatico: tubo direto)
+  const teB=te(jt,1,270,0);              // ramal a direita: retorno bomba-tanque
+  t=tubo(teB,1,'U',14); const te3=te(t,1,90,1);              // ramal a esquerda: linha da frente
+  const vct=liga(N('valvula_borboleta_pneu',{rot:90,nome:'Válvula canhão de teto'}),1,te3,0);
+  t=ate(vct,0,'U',52); const ct=liga(N('canhao_teto'),0,t,1);
+  // retorno bomba-tanque: sobe por fora do tanque LGE e entra pela tampa do tanque de agua
+  t=tubo(teB,2,'R',12); const vbt=liga(N('valvula_borboleta_pneu',{nome:'Válvula bomba-tanque'}),0,t,1);
+  { const topo=P(tq,1); t=ate(vbt,1,'R',P(tl,0).x+60); c=curva(t,1,'L','U'); t=ate(c,c._s,'U',topo.y-26); c=curva(t,1,'D','R');
+    const tmp=curva(c,c._s,'L','D'), dx=P(tmp,tmp._s).x-P(tmp,0).x; L0.splice(L0.indexOf(tmp),1);
+    t=ate(c,c._s,'R',topo.x-dx); c=curva(t,1,'L','D'); t=ate(c,c._s,'D',topo.y); }
+  // linha da frente: expedicoes laterais, mangotinho, dispersador e canhao de para-choque
+  t=tubo(te3,2,'L',18); const te4=te(t,1,0,1); const exp=liga(N('expedicao_storz',{rot:90,nome:'Expedição lateral 2½"'}),0,te4,2);
+  t=tubo(te4,0,'L',18); const te5=te(t,1,0,1); const vmg=liga(N('valvula_esferica',{rot:90,nome:'Registro do mangotinho'}),0,te5,2);
+  t=tubo(vmg,1,'D',8); const car=liga(N('carretel_mangotinho',{rot:90,w:40}),0,t,1);
+  t=tubo(te5,0,'L',18); const te6=te(t,1,0,1); const vds=liga(N('valvula_borboleta_pneu',{rot:90,nome:'Válvula dispersador'}),0,te6,2);
+  t=tubo(vds,1,'D',14); const dsp=liga(N('dispersador',{rot:90,w:30}),0,t,1);
+  t=tubo(te6,0,'L',18); const vpc=liga(N('valvula_borboleta_pneu',{nome:'Válvula canhão para-choque'}),1,t,1);
+  t=ate(vpc,0,'L',70); c=curva(t,1,'R','U'); const cp=liga(N('canhao_parachoque'),0,c,c._s);
+  // inundador: bomba eletrica ligada ao tanque, linha alta ate o para-brisa
+  const be=liga(N('bomba_eletrica',{nome:'Bomba do inundador'}),0,teI,2);
+  { const inu=N('inundador',{w:120}); inu.x=134; inu.y=158; const ent=P(inu,0);
+    t=ate(be,1,'U',96); c=curva(t,1,'D','L');
+    const tmp=curva(c,c._s,'R','D'), dx=P(tmp,tmp._s).x-P(tmp,1).x; L0.splice(L0.indexOf(tmp),1);
+    t=ate(c,c._s,'L',ent.x-dx); c=curva(t,1,'R','D'); t=ate(c,c._s,'D',ent.y); }
+  // comandos e pneumatica (sem ligacao hidraulica, so para identificar)
+  return L0; }
+$('completo').onclick=()=>{ if(E.itens.length&&!confirm('Substituir o esquema atual pelo sistema completo?')) return; marca(); if(E.tocando) setPlay(false);
+  E.itens=montaCompleto(); E.uid=E.itens.length+1; E.fundo='lateral'; E.sel=null; fundo(); desenha(); salva(); enquadra(); };
+// ---------- dentro do simulador (sobreposicao): voltar fecha a camada ----------
+$('voltar').onclick=e=>{ if(window.parent!==window){ e.preventDefault(); if(E.tocando) setPlay(false); window.parent.postMessage('fecharEsquema','*'); } };
+// ---------- inicio ----------
+monta(); try{ const s=JSON.parse(localStorage.getItem('cci_esquema2d')||'null'); if(s&&Array.isArray(s.itens)){ E.itens=s.itens.filter(i=>ITEM[i.id]); E.fundo=s.fundo||'lateral'; E.uid=s.uid||1+E.itens.length; } }catch(e){}
+fundo(); desenha(); dica();
+function enquadraQuandoPronto(n){ const r=$('palco').getBoundingClientRect(); if((r.width<50||r.height<50)&&n<60) return requestAnimationFrame(()=>enquadraQuandoPronto(n+1)); enquadra(); }
+enquadraQuandoPronto(0); window.addEventListener('load',()=>enquadraQuandoPronto(0)); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) aplicaVista(); });
+</script>
+</body>
+</html>

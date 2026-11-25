@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="960" height="300"><title>Caminhão CCI 4x4 - vista superior (1 m = 100 px)</title>
+<g fill="none" stroke="#7d8896" stroke-width="3" stroke-linejoin="round">
+<rect x="30" y="25" width="215" height="250" rx="30" fill="#eef2f6"/><rect x="250" y="25" width="680" height="250" rx="10" fill="#f5f7f9"/>
+<g fill="#3a4048" stroke="#252a30"><rect x="108" y="6" width="104" height="22" rx="6"/><rect x="108" y="272" width="104" height="22" rx="6"/><rect x="558" y="6" width="104" height="22" rx="6"/><rect x="558" y="272" width="104" height="22" rx="6"/></g>
+<path d="M250 150 H930" stroke-dasharray="8 8" stroke-width="2"/></g></svg>

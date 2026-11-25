@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" width="960" height="460"><title>Caminhão CCI 4x4 - vista lateral (1 m = 100 px)</title>
+<g fill="none" stroke="#7d8896" stroke-width="3" stroke-linejoin="round">
+<path d="M30 330 V170 Q30 120 80 112 L190 100 Q225 98 232 130 L246 210 V330 Z" fill="#eef2f6"/>
+<path d="M60 128 L182 116 Q204 116 208 140 L218 196 H60 Z" fill="#dce7f1"/>
+<rect x="250" y="60" width="680" height="270" rx="10" fill="#f5f7f9"/>
+<path d="M250 330 H930" stroke-width="5"/><rect x="20" y="330" width="920" height="22" rx="6" fill="#d9dee4"/>
+<g fill="#3a4048" stroke="#252a30"><circle cx="160" cy="372" r="52"/><circle cx="610" cy="372" r="52"/></g>
+<g fill="#aab3bd" stroke="none"><circle cx="160" cy="372" r="20"/><circle cx="610" cy="372" r="20"/></g>
+<path d="M290 60 V330 M890 60 V330" stroke-dasharray="8 8" stroke-width="2"/>
+</g><g font-family="Arial" font-size="16" fill="#7d8896"><text x="120" y="450">8,95 m · entre-eixos 4,50 m · altura 4,02 m</text></g></svg>

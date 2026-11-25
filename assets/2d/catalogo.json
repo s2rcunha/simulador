@@ -1,0 +1,567 @@
+{
+ "escala": "1 m = 100 px nos fundos; \"largura\" = largura sugerida do item em px nessa escala",
+ "fundos": [
+  {
+   "id": "lateral",
+   "nome": "Caminhão – vista lateral",
+   "arquivo": "assets/2d/fundo_caminhao_lateral.svg",
+   "largura": 960,
+   "altura": 460
+  },
+  {
+   "id": "superior",
+   "nome": "Caminhão – vista superior",
+   "arquivo": "assets/2d/fundo_caminhao_superior.svg",
+   "largura": 960,
+   "altura": 300
+  }
+ ],
+ "itens": [
+  {
+   "id": "tanque_agua",
+   "nome": "Tanque de água (6100 L)",
+   "categoria": "Reservatórios",
+   "arquivo": "assets/2d/tanque_agua.svg",
+   "largura": 290,
+   "descricao": "Reservatório principal de polipropileno. Saída embaixo; entradas na tampa e nas duas laterais (abastecimento por pressão e retorno bomba-tanque).",
+   "proporcao": 0.6,
+   "vb": [
+    200,
+    120
+   ]
+  },
+  {
+   "id": "tanque_lge",
+   "nome": "Tanque de LGE (860 L)",
+   "categoria": "Reservatórios",
+   "arquivo": "assets/2d/tanque_lge.svg",
+   "largura": 85,
+   "descricao": "Reservatório do líquido gerador de espuma.",
+   "proporcao": 1.0,
+   "vb": [
+    120,
+    120
+   ]
+  },
+  {
+   "id": "bomba_incendio",
+   "nome": "Bomba de incêndio",
+   "categoria": "Bomba e acionamento",
+   "arquivo": "assets/2d/bomba_incendio.svg",
+   "largura": 55,
+   "descricao": "Bomba centrífuga: sucção à esquerda, recalque em cima.",
+   "proporcao": 1.0,
+   "vb": [
+    120,
+    120
+   ]
+  },
+  {
+   "id": "pto_cardan",
+   "nome": "PTO e cardan",
+   "categoria": "Bomba e acionamento",
+   "arquivo": "assets/2d/pto_cardan.svg",
+   "largura": 85,
+   "descricao": "Tomada de força e eixo cardan até a bomba.",
+   "proporcao": 0.35,
+   "vb": [
+    200,
+    70
+   ]
+  },
+  {
+   "id": "bomba_escorva",
+   "nome": "Bomba de escorva",
+   "categoria": "Bomba e acionamento",
+   "arquivo": "assets/2d/bomba_escorva.svg",
+   "largura": 45,
+   "descricao": "Retira o ar da sucção (máx. 30 s).",
+   "proporcao": 1.0,
+   "vb": [
+    100,
+    100
+   ]
+  },
+  {
+   "id": "bypass",
+   "nome": "Bypass / regulador de pressão",
+   "categoria": "Bomba e acionamento",
+   "arquivo": "assets/2d/bypass.svg",
+   "largura": 30,
+   "descricao": "Recircula água quando as expedições fecham.",
+   "proporcao": 1.375,
+   "vb": [
+    80,
+    110
+   ]
+  },
+  {
+   "id": "ada_proporcionador",
+   "nome": "Sistema ADA (proporcionador)",
+   "categoria": "Espuma",
+   "arquivo": "assets/2d/ada_proporcionador.svg",
+   "largura": 40,
+   "descricao": "Venturi que aspira o LGE para a sucção.",
+   "proporcao": 1.2727,
+   "vb": [
+    110,
+    140
+   ]
+  },
+  {
+   "id": "dosador",
+   "nome": "Dosador de LGE (3 / 6 %)",
+   "categoria": "Espuma",
+   "arquivo": "assets/2d/dosador.svg",
+   "largura": 22,
+   "descricao": "Alavanca de dosagem 3 % / 6 %.",
+   "proporcao": 1.1111,
+   "vb": [
+    90,
+    100
+   ]
+  },
+  {
+   "id": "valvula_lge",
+   "nome": "Válvula de LGE (pneumática)",
+   "categoria": "Espuma",
+   "arquivo": "assets/2d/valvula_lge.svg",
+   "largura": 30,
+   "descricao": "Libera o LGE para o ADA (solenoide 2).",
+   "proporcao": 1.1,
+   "vb": [
+    100,
+    110
+   ]
+  },
+  {
+   "id": "valvula_borboleta_pneu",
+   "nome": "Válvula borboleta com atuador",
+   "categoria": "Válvulas",
+   "arquivo": "assets/2d/valvula_borboleta_pneu.svg",
+   "largura": 40,
+   "descricao": "Tanque-bomba, bomba-tanque, canhões e dispersador.",
+   "proporcao": 0.8,
+   "vb": [
+    100,
+    80
+   ]
+  },
+  {
+   "id": "valvula_borboleta_manual",
+   "nome": "Válvula borboleta manual",
+   "categoria": "Válvulas",
+   "arquivo": "assets/2d/valvula_borboleta_manual.svg",
+   "largura": 36,
+   "descricao": "Borboleta de alavanca.",
+   "proporcao": 0.8,
+   "vb": [
+    100,
+    80
+   ]
+  },
+  {
+   "id": "valvula_esferica",
+   "nome": "Válvula esférica com alavanca",
+   "categoria": "Válvulas",
+   "arquivo": "assets/2d/valvula_esferica.svg",
+   "largura": 32,
+   "descricao": "Sucção, expedições, admissão e mangotinho.",
+   "proporcao": 0.8,
+   "vb": [
+    100,
+    80
+   ]
+  },
+  {
+   "id": "junta_expansao",
+   "nome": "Junta de expansão",
+   "categoria": "Válvulas",
+   "arquivo": "assets/2d/junta_expansao.svg",
+   "largura": 30,
+   "descricao": "Rompe acima de 15 bar.",
+   "proporcao": 0.7,
+   "vb": [
+    100,
+    70
+   ]
+  },
+  {
+   "id": "valvula_retencao",
+   "nome": "Válvula de retenção",
+   "categoria": "Válvulas",
+   "arquivo": "assets/2d/valvula_retencao.svg",
+   "largura": 30,
+   "descricao": "Deixa passar num só sentido.",
+   "proporcao": 0.7,
+   "vb": [
+    100,
+    70
+   ]
+  },
+  {
+   "id": "solenoide_52",
+   "nome": "Válvula solenoide 5/2 vias",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/solenoide_52.svg",
+   "largura": 30,
+   "descricao": "Comanda um atuador (saídas A e B, botão manual azul).",
+   "proporcao": 0.9091,
+   "vb": [
+    110,
+    100
+   ]
+  },
+  {
+   "id": "painel_solenoides",
+   "nome": "Painel de solenoides",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/painel_solenoides.svg",
+   "largura": 120,
+   "descricao": "Solenoides 1 a 6 alimentados em série.",
+   "proporcao": 0.4545,
+   "vb": [
+    220,
+    100
+   ]
+  },
+  {
+   "id": "lubrifil",
+   "nome": "Lubrifil (filtro, regulador, lubrificador)",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/lubrifil.svg",
+   "largura": 35,
+   "descricao": "Filtra, regula e lubrifica o ar.",
+   "proporcao": 1.0909,
+   "vb": [
+    110,
+    120
+   ]
+  },
+  {
+   "id": "compressor",
+   "nome": "Compressor e reservatório de ar",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/compressor.svg",
+   "largura": 60,
+   "descricao": "Carrega o reservatório (até 8 bar) com o motor ligado.",
+   "proporcao": 0.625,
+   "vb": [
+    160,
+    100
+   ]
+  },
+  {
+   "id": "mangueira_ar",
+   "nome": "Mangueira de ar (6 mm)",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/mangueira_ar.svg",
+   "largura": 60,
+   "descricao": "Liga solenoide e atuador.",
+   "proporcao": 0.375,
+   "vb": [
+    160,
+    60
+   ]
+  },
+  {
+   "id": "atuador_pneumatico",
+   "nome": "Atuador pneumático (dupla ação)",
+   "categoria": "Pneumática",
+   "arquivo": "assets/2d/atuador_pneumatico.svg",
+   "largura": 30,
+   "descricao": "Porta A abre, porta B fecha.",
+   "proporcao": 0.6667,
+   "vb": [
+    120,
+    80
+   ]
+  },
+  {
+   "id": "painel_central",
+   "nome": "Painel de comando central",
+   "categoria": "Comandos",
+   "arquivo": "assets/2d/painel_central.svg",
+   "largura": 55,
+   "descricao": "Chave geral, chaves rotativas, manômetro, vacuômetro e níveis.",
+   "proporcao": 0.8125,
+   "vb": [
+    160,
+    130
+   ]
+  },
+  {
+   "id": "painel_cabine",
+   "nome": "Painel da cabine (PTO e acelerador)",
+   "categoria": "Comandos",
+   "arquivo": "assets/2d/painel_cabine.svg",
+   "largura": 35,
+   "descricao": "Engate do PTO e acelerador.",
+   "proporcao": 0.8182,
+   "vb": [
+    110,
+    90
+   ]
+  },
+  {
+   "id": "joystick",
+   "nome": "Joystick do canhão",
+   "categoria": "Comandos",
+   "arquivo": "assets/2d/joystick.svg",
+   "largura": 22,
+   "descricao": "Comanda o canhão (botão esquerdo).",
+   "proporcao": 1.375,
+   "vb": [
+    80,
+    110
+   ]
+  },
+  {
+   "id": "painel_parachoque",
+   "nome": "Painel do canhão de para-choque",
+   "categoria": "Comandos",
+   "arquivo": "assets/2d/painel_parachoque.svg",
+   "largura": 30,
+   "descricao": "Chave sob proteção, luz e joystick.",
+   "proporcao": 0.7273,
+   "vb": [
+    110,
+    80
+   ]
+  },
+  {
+   "id": "bomba_eletrica",
+   "nome": "Bomba elétrica (inundador)",
+   "categoria": "Comandos",
+   "arquivo": "assets/2d/bomba_eletrica.svg",
+   "largura": 22,
+   "descricao": "Bomba 24 V que alimenta o inundador.",
+   "proporcao": 0.7273,
+   "vb": [
+    110,
+    80
+   ]
+  },
+  {
+   "id": "canhao_teto",
+   "nome": "Canhão de teto (monitor)",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/canhao_teto.svg",
+   "largura": 50,
+   "descricao": "3000 L/min, alcance ~70 m.",
+   "proporcao": 0.8,
+   "vb": [
+    150,
+    120
+   ]
+  },
+  {
+   "id": "canhao_parachoque",
+   "nome": "Canhão de para-choque",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/canhao_parachoque.svg",
+   "largura": 40,
+   "descricao": "950 L/min, alcance 50 m.",
+   "proporcao": 0.7692,
+   "vb": [
+    130,
+    100
+   ]
+  },
+  {
+   "id": "expedicao_storz",
+   "nome": "Expedição 2½\" com storz",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/expedicao_storz.svg",
+   "largura": 30,
+   "descricao": "Válvula esférica + engate storz.",
+   "proporcao": 0.7273,
+   "vb": [
+    110,
+    80
+   ]
+  },
+  {
+   "id": "rolo_mangueira",
+   "nome": "Rolo de mangueira (15 m)",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/rolo_mangueira.svg",
+   "largura": 35,
+   "descricao": "Linha de 2½\" enrolada.",
+   "proporcao": 1.0,
+   "vb": [
+    100,
+    100
+   ]
+  },
+  {
+   "id": "carretel_mangotinho",
+   "nome": "Carretel de mangotinho (1\" x 30 m)",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/carretel_mangotinho.svg",
+   "largura": 45,
+   "descricao": "Carretel retrátil com esguicho regulável.",
+   "proporcao": 0.8462,
+   "vb": [
+    130,
+    110
+   ]
+  },
+  {
+   "id": "esguicho",
+   "nome": "Esguicho regulável (pistola)",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/esguicho.svg",
+   "largura": 22,
+   "descricao": "Jato compacto ou neblina 30°/60°.",
+   "proporcao": 0.6154,
+   "vb": [
+    130,
+    80
+   ]
+  },
+  {
+   "id": "dispersador",
+   "nome": "Dispersador",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/dispersador.svg",
+   "largura": 30,
+   "descricao": "Molha o chão à frente (57 L/min).",
+   "proporcao": 0.6154,
+   "vb": [
+    130,
+    80
+   ]
+  },
+  {
+   "id": "inundador",
+   "nome": "Inundador de para-brisa",
+   "categoria": "Expedições",
+   "arquivo": "assets/2d/inundador.svg",
+   "largura": 130,
+   "descricao": "Barra de bicos e limpadores.",
+   "proporcao": 0.5625,
+   "vb": [
+    160,
+    90
+   ]
+  },
+  {
+   "id": "mangote_ralo",
+   "nome": "Mangote 4\" com ralo",
+   "categoria": "Sucção e abastecimento",
+   "arquivo": "assets/2d/mangote_ralo.svg",
+   "largura": 35,
+   "descricao": "Sucção de manancial; o ralo tem retenção.",
+   "proporcao": 1.3636,
+   "vb": [
+    110,
+    150
+   ]
+  },
+  {
+   "id": "admissao",
+   "nome": "Admissão do tanque (storz)",
+   "categoria": "Sucção e abastecimento",
+   "arquivo": "assets/2d/admissao.svg",
+   "largura": 30,
+   "descricao": "Abastece por hidrante ou esvazia por gravidade.",
+   "proporcao": 0.7273,
+   "vb": [
+    110,
+    80
+   ]
+  },
+  {
+   "id": "hidrante",
+   "nome": "Hidrante de coluna",
+   "categoria": "Sucção e abastecimento",
+   "arquivo": "assets/2d/hidrante.svg",
+   "largura": 40,
+   "descricao": "Rede pública com pressão.",
+   "proporcao": 1.75,
+   "vb": [
+    80,
+    140
+   ]
+  },
+  {
+   "id": "manancial",
+   "nome": "Manancial (poço / represa)",
+   "categoria": "Sucção e abastecimento",
+   "arquivo": "assets/2d/manancial.svg",
+   "largura": 200,
+   "descricao": "Fonte de água abaixo do caminhão.",
+   "proporcao": 0.55,
+   "vb": [
+    200,
+    110
+   ]
+  },
+  {
+   "id": "tubo_reto",
+   "nome": "Tubo reto",
+   "categoria": "Tubulação",
+   "arquivo": "assets/2d/tubo_reto.svg",
+   "largura": 100,
+   "descricao": "Trecho reto (estique e gire).",
+   "proporcao": 0.2,
+   "vb": [
+    200,
+    40
+   ]
+  },
+  {
+   "id": "tubo_curva",
+   "nome": "Curva 90°",
+   "categoria": "Tubulação",
+   "arquivo": "assets/2d/tubo_curva.svg",
+   "largura": 40,
+   "descricao": "Curva de 90 graus.",
+   "proporcao": 1.0,
+   "vb": [
+    100,
+    100
+   ]
+  },
+  {
+   "id": "tubo_te",
+   "nome": "Tê",
+   "categoria": "Tubulação",
+   "arquivo": "assets/2d/tubo_te.svg",
+   "largura": 45,
+   "descricao": "Derivação em T.",
+   "proporcao": 0.75,
+   "vb": [
+    120,
+    90
+   ]
+  },
+  {
+   "id": "tubo_reducao",
+   "nome": "Redução",
+   "categoria": "Tubulação",
+   "arquivo": "assets/2d/tubo_reducao.svg",
+   "largura": 40,
+   "descricao": "Muda o diâmetro.",
+   "proporcao": 0.5,
+   "vb": [
+    120,
+    60
+   ]
+  },
+  {
+   "id": "fio_eletrico",
+   "nome": "Fio elétrico",
+   "categoria": "Tubulação",
+   "arquivo": "assets/2d/fio_eletrico.svg",
+   "largura": 60,
+   "descricao": "Liga painel e bobinas.",
+   "proporcao": 0.375,
+   "vb": [
+    160,
+    60
+   ]
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+SONS REAIS DO SIMULADOR
+=======================
+Coloque nesta pasta (assets/sons/) arquivos com os nomes abaixo, em .mp3, .ogg ou .wav.
+Cada arquivo encontrado substitui o som sintetizado correspondente; os que faltarem continuam sintetizados.
+Recarregue a página depois de adicionar ou trocar arquivos. No console do navegador (F12) aparece
+"[sons] nome.ext carregado" para cada arquivo achado. As tentativas que não acham arquivo aparecem como
+"404" no console: é normal.
+
+NOME            TIPO     O QUE GRAVAR / COMO É USADO
+motor_partida   1 vez    Arranque + pegada do motor (~1 a 2 s). Toca ao ligar o motor.
+motor_lenta     laço     Motor em marcha lenta, contínuo, ~650 rpm. A velocidade de reprodução segue a rotação.
+motor_alto      laço     (opcional) Motor acelerado ~2000 rpm. Se existir, mistura com o de marcha lenta.
+motor_desliga   1 vez    Motor desligando.
+pto_engate      1 vez    "Clunk" do engate do PTO.
+bomba           laço     Giro da bomba / PTO / cardan. Velocidade segue a rotação da bomba.
+escorva         laço     Bomba de escorva funcionando.
+bip             1 vez    Um "pi" curto do alarme da escorva (repetido pelo simulador).
+ar_vazando      laço     Chiado de ar comprimido escapando.
+agua_jato       laço     Água saindo em jato (canhão/linhas). Volume segue a vazão total.
+seco            laço     Bomba girando a seco (raspagem/rangido).
+fogo            laço     Crepitar de fogo (missão do fogo).
+
+DICAS
+* Laços: corte o início e o fim no mesmo ponto da onda para não "estalar" na emenda; 2 a 6 s bastam.
+* Grave o laço do motor numa rotação constante; se a rotação real for diferente, ajuste em index.html,
+  em SOM.cfg (procure "SONS REAIS"): motor_lenta.rpm e motor_alto.rpm. Ali também se ajusta o volume (vol).
+* O simulador precisa ser aberto por um servidor local (como já é para os modelos .glb); com file:// o
+  navegador não deixa ler os arquivos.
+* Fontes de sons livres: freesound.org (filtre por licença CC0) ou gravações próprias do caminhão.
