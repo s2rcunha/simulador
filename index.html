@@ -50,6 +50,33 @@
   #painel small::before{content:'ⓘ ';color:var(--acc)}
   #painel select{flex:1;font:inherit;font-size:12px;padding:5px;border-radius:8px;border:1px solid var(--bd);background:var(--panel);color:var(--txt)}
   .rot{font-size:11px;color:var(--mut);min-width:58px}
+  /* ---- modo apresentacao (16:9) ---- */
+  body.video{background:#000;cursor:none}
+  body.video #painel,body.video #btnRoda,body.video #pip,body.video .dicaFlut,body.video #panCard,body.video #tecCard,body.video #insDica,body.video #roda .rdAjuda{display:none!important}
+  body.video #alertas{display:none} body.video.vidAlr #alertas{display:flex;left:calc(var(--fl) + var(--fw) * .3);right:auto;width:calc(var(--fw) * .4);top:calc(var(--ft) + var(--fh) * .04);bottom:auto}
+  body.video #roda{inset:auto;left:var(--fl);top:var(--ft);width:var(--fw);height:var(--fh);background:radial-gradient(circle,rgba(0,0,0,.2) 0,rgba(0,0,0,.7) 75%);backdrop-filter:none}
+  body.video #roda svg{width:calc(var(--fh) * .9);height:calc(var(--fh) * .9)}
+  body.video #roda .centro{width:calc(var(--fh) * .26)}
+  body.video #cartao{left:calc(var(--fl) + var(--fw) * .63)!important;top:calc(var(--ft) + var(--fh) * .06)!important;width:calc(var(--fw) * .33);max-height:calc(var(--fh) * .62);font-size:calc(var(--fh) * .019)}
+  body.video #insFicha,body.video #insRot{left:calc(var(--fl) + var(--fw) * .63);right:auto;width:calc(var(--fw) * .33);top:calc(var(--ft) + var(--fh) * .06);max-height:calc(var(--fh) * .62);font-size:calc(var(--fh) * .019)}
+  body.video #esqOverlay{inset:auto;left:var(--fl);top:var(--ft);width:var(--fw);height:var(--fh)}
+  #vidUI{position:fixed;left:var(--fl);top:var(--ft);width:var(--fw);height:var(--fh);z-index:120;pointer-events:none;font-family:system-ui,Segoe UI,Arial,sans-serif;color:#fff;overflow:hidden}
+  #vidTit{position:absolute;left:8%;right:8%;top:30%;text-align:center;opacity:0;transform:translateY(-12px);transition:opacity .7s,transform .7s;text-shadow:0 3px 18px #000c}
+  #vidTit.on{opacity:1;transform:none} #vidTit b{display:block;font-size:calc(var(--fh) * .11);letter-spacing:.04em;line-height:1.05}
+  #vidTit span{display:block;margin-top:.5em;font-size:calc(var(--fh) * .045);opacity:.9}
+  #vidCap{position:absolute;left:5%;bottom:8%;max-width:58%;padding:.6em 1em;border-radius:14px;background:rgba(10,14,20,.72);border-left:6px solid #e53935;font-size:calc(var(--fh) * .042);line-height:1.25;opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s;box-shadow:0 6px 24px #0007}
+  #vidCap.on{opacity:1;transform:none} #vidCap b{color:#ffcf4a}
+  body.video:has(#roda.on) #vidCap{max-width:21%;bottom:auto;top:38%;font-size:calc(var(--fh) * .036)}   /* com a roda aberta a legenda vai para a esquerda */
+  #vidTag{position:absolute;left:5%;top:7%;padding:.35em .8em;border-radius:999px;background:#3ddc84;color:#05210f;font-weight:700;font-size:calc(var(--fh) * .032);opacity:0;transition:opacity .3s}
+  #vidTag.on{opacity:1}
+  #vidFade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .55s} #vidFade.on{opacity:1}
+  #vidFim{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.6em;padding:8%;opacity:0;transition:opacity .8s}
+  #vidFim.on{opacity:1} #vidFim b{font-size:calc(var(--fh) * .09);line-height:1.1} #vidFim span{font-size:calc(var(--fh) * .04);opacity:.85} #vidFim i{position:absolute;bottom:3%;font-size:12px;opacity:.35}
+  #vidCur{position:fixed;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 0 0 4px rgba(255,255,255,.3),0 3px 10px #0008;opacity:0;transition:opacity .25s,transform .15s;left:50%;top:70%}
+  #vidCur.on{opacity:1} #vidCur.cl{transform:scale(.7)}
+  #vidIni{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:10%;background:rgba(0,0,0,.6);pointer-events:auto;cursor:pointer}
+  #vidIni b{font-size:28px} #vidIni span{font-size:17px;opacity:.8} #vidIni.ok span{color:#3ddc84;opacity:1} #vidIni small{font-size:13px;opacity:.55;line-height:1.5}
+  #vidPausa{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:8px;background:#000a;font-size:12px;display:none} #vidPausa.on{display:block}
   /* ---- menu em roda ---- */
   #roda{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,.25) 0,rgba(0,0,0,.72) 70%);backdrop-filter:blur(2px);user-select:none}
   #roda.on{display:flex}
@@ -166,7 +193,7 @@
   </div>
   <div class="linha"><button id="btnLGE" class="bloq">Botão ÁGUA / LGE: desligado</button></div>
   <small id="avisoPainel"></small>
-  <small style="margin:0 0 4px">Clique no modelo 3D: primeiro a chave geral (vermelha, na lateral esquerda do painel); Gire o botãoTANQUE / BOMBA. Ele energiza a bobina pelos fios vermelho (+24 V) e azul (0 V). Lâmpada laranja = atuador fechado; verde = atuador totalmente aberto.</small>
+  <small style="margin:0 0 4px">Clique no modelo 3D: primeiro a chave geral (vermelha, na lateral esquerda do painel); só então o botão giratório TANQUE / BOMBA pode ser girado. Ele energiza a bobina pelos fios vermelho (+24 V) e azul (0 V). Lâmpada laranja = atuador fechado; verde = atuador totalmente aberto. Se a chave geral for desligada, o botão volta para desligado.</small>
   <label class="ck"><input type="checkbox" id="ckOv"> Botão manual azul do solenoide (sem energia)</label>
   <small style="margin:0 0 4px">Também dá para acionar direto no modelo 3D: clique no botão azul do solenoide para ligar/desligar, ou mantenha pressionado para acionar só enquanto segura.</small>
 
@@ -428,7 +455,7 @@
   if(secs[5]){ secs[4]=secs[4].concat(secs[5]); delete secs[5]; }
   if(secs[2]){ secs[1]=(secs[1]||[]).concat(secs[2]); delete secs[2]; }                         // compressor + lubrifil = ar comprimido                               // mangueiras do atuador junto da valvula
   const CATS=[
-    ['Início',[[1,'Ar comprimido','compressor · lubrifil'],[3,'Painel elétrico','24 V · chave geral'],[6,'Bomba de incêndio','PTO · acelerador']]],
+    ['Partida',[[1,'Ar comprimido','compressor · lubrifil'],[3,'Painel elétrico','24 V · chave geral'],[6,'Bomba de incêndio','PTO · acelerador']]],
     ['Água',[[4,'Válvula tanque-bomba','solenoide 1'],[10,'Sucção de manancial','escorva'],[11,'Retorno bomba → tanque','solenoide 5'],[14,'Admissão do tanque','hidrante']]],
     ['Espuma',[[7,'Linha de LGE','solenoide 2 · dosador']]],
     ['Expedições',[[8,'Canhão de teto','solenoide 3'],[9,'Canhão de para-choque','solenoide 4'],[12,'Expedições laterais 2½"','storz'],[16,'Carretel de mangotinho','1" x 30 m'],[13,'Dispersador','solenoide 6'],[15,'Inundador de para-brisa','bomba elétrica']]],
@@ -465,7 +492,7 @@
 // clique no centro = voltar; Esc = fechar. Os grupos de comandos abrem num cartao flutuante (os mesmos elementos do
 // antigo menu lateral, com as leituras atualizando). O painel lateral fica oculto.
 (function rodaMenu(){ const P=document.getElementById('painel'); if(!P||!window.MENU) return; const $i=id=>document.getElementById(id);
-  const ICO={Início:'⚡','Água':'💧',Espuma:'🫧','Expedições':'🚒',PQS:'🧯',Vistas:'📷',Ferramentas:'🛠',Roteiros:'🧭','Opções':'⚙'};
+  const ICO={Partida:'⚡','Água':'💧',Espuma:'🫧','Expedições':'🚒',PQS:'🧯',Vistas:'📷',Ferramentas:'🛠',Roteiros:'🧭','Opções':'⚙'};
   P.style.display='none';
   // ---------- cartao flutuante ----------
   const card=document.createElement('div'); card.id='cartao';
@@ -494,6 +521,7 @@
     {nome:txt('btnIr','Ir'),ico:'🔍',sub:'aproximar de uma peça (Shift)',acao:clica('btnIr')},
     {nome:'Esquema 2D',ico:'📐',sub:'montagem didática',acao:clica('btnEsq')},
     {nome:'Controles',ico:'⌨',sub:'teclas do painel e joysticks',acao:clica('btnTec')},
+    {nome:'Modo apresentação',ico:'🎬',sub:'vídeo 16:9 para o YouTube',acao:()=>{ location.href=location.pathname+'?video'; }},
     {nome:'Restaurar padrão',ico:'↺',sub:'reinicia todo o sistema',acao:clica('btnRestaura')}]};
   const rots={nome:'Roteiros',sub:'passo a passo guiado',filhos:()=>{ const s=$i('rotSel'); return s?[...s.options].filter(o=>o.value!=='').map(o=>({nome:o.textContent,sub:'roteiro guiado',acao:()=>{ s.value=o.value; s.dispatchEvent(new Event('change')); }})):[]; }};
   const RAIZ={nome:'Menu',filhos:[...MENU.cats.map(c=>({nome:c.nome,sub:c.grupos.length+' grupo'+(c.grupos.length>1?'s':''),
@@ -549,6 +577,8 @@ const TQ_CAP=6100;                      // capacidade do tanque de agua (L)
 let TQV=null;                           // malhas da agua do tanque (volume e superficie) para mostrar o nivel                       // tempo maximo de funcionamento da escorva (s), conforme a apostila de treinamento
 // sinal sonoro da escorva (Web Audio): bipes curtos "pi pi pi pi"
 const BIP={ctx:null,t:0,mudo:false};
+window.VID={on:/[?&]video\b/.test(location.search),zoom:1.0,zoomCam:1.0,zoomFogo:1.0,fov:35};   // modo apresentacao (video 16:9)
+function vidQuadro(){ let w=innerWidth, h=Math.round(w*9/16); if(h>innerHeight){ h=innerHeight; w=Math.round(h*16/9); } return {w,h,l:Math.round((innerWidth-w)/2),t:Math.round((innerHeight-h)/2)}; }
 const PURGA_L=130;   // litros de agua do tanque que precisam descer pelo mangote (ralo retirado) para expulsar o ar da linha de succao
 const PANE={esc:false,fus:false,comp:false,filtro:false,arSuc:false,ralo:false,bob:{}};   // panes ativas (ver SISTEMA DE PANES)
 function furoF(v,h){ return (v===null||v===undefined||!h||!(h.furo||h.vaz))?v:Math.min(v,1.0); }   // mangueira furada: nao passa de ~1 bar
@@ -3039,7 +3069,7 @@ function setModo(m){
   $('corteOpc').style.display=m==='corte'?'block':'none';
   $('dica').textContent = m==='corte'
     ? 'Corte: válvula seccionada na vertical, atuador e solenoide mostrando o interior. Ligue o motor (o compressor de ar funciona com ele), ligue a chave geral do painel e gire o botão TANQUE / BOMBA (energiza a bobina): o carretel desloca, o ar vai para a porta A do atuador, os pistões se afastam e o pinhão gira a válvula. No ADA, a boquilha de injeção (venturi) aparece cortada: com a bomba girando, a água acelera na garganta estreita, a pressão cai e o LGE (amarelo) é puxado pelo orifício de cima, saindo misturado de volta para a sucção.'
-    : 'Aperte X para exibir os componentes interativos';
+    : 'Ligue o motor (o compressor de ar funciona com ele), ajuste o lubrifil (mín. 2 bar para o atuador vencer o atrito) e ligue a chave geral e o botão TANQUE / BOMBA do painel (energiza a bobina): a válvula abre. Desligue o botão e a mola do solenoide inverte o ar: a válvula fecha. Com o regulador em 0 bar, ou sem ar, só a alavanca vermelha (arraste) move a válvula (fechada: apontando para frente; aberta: paralela à tubulação). A água na tubulação (transparente) só escoa quando a válvula abre.';
   vista(m==='corte'?'corte':'conj',true);
 }
 const VISTAS={conj:{p:[-1.20,2.65,7.35],t:[-1.20,0.16,-0.18]}, val:{p:[0.30,0.36,1.05],t:[-0.18,0.08,-0.03]}, pai:{p:[1.65,0.90,1.55],t:[0.86182,0.09827,0.25548]}, tanque:{p:[-2.75,1.75,3.40],t:[-2.49,0.38,0]}, bomba:{p:[1.30,0.85,0.50],t:[0.80,0.02,-0.85]}, ada:{p:[1.30,1.25,0.60],t:[0.80,0.52,-0.45]}, lge:{p:[2.60,1.55,1.65],t:[1.30,0.45,-0.30]}, vlge:{p:[1.30,0.98,0.22],t:[1.15,0.86,-0.22]}, cab:{p:[0.80,0.52,0.82],t:[0.75,0.12,0.26]}, can:{p:[2.30,2.10,-0.70],t:[0.80,1.10,-1.85]}, vcan:{p:[1.30,0.95,-1.05],t:[0.80,0.70,-1.20]}, junta:{p:[1.25,0.85,-0.80],t:[0.80,0.60,-1.05]}, par:{p:[1.55,1.00,-3.20],t:[0.80,0.42,-2.20]}, vpar:{p:[1.30,0.62,-1.62],t:[0.80,0.36,-1.90]}, jato:{p:[34,22,14],t:[0.8,1.0,-36]}, byp:{p:[1.32,1.05,0.55],t:[0.88,0.22,-0.42]}, exp:{p:[1.40,1.00,-1.15],t:[0.80,0.60,-0.75]}, dos:{p:[0.66,1.30,-0.22],t:[0.77,0.85,-0.62]}, sol:{p:[-0.20,0.80,0.40],t:[-0.48,0.32,-0.95]}, corte:{p:[0.34,0.34,0.95],t:[-0.15,0.09,-0.03]}};
@@ -3479,7 +3509,10 @@ function aplica(){
   desenhaManometro(S.pSup);
   if(typeof cena.onMudar==='function'){ const j=JSON.stringify([Math.round(S.pSup*10),Math.round(S.pReg*10),Math.round(S.setp*10),Math.round(S.pA*10),Math.round(S.pB*10),Math.round(S.ang*2),S.st,S.coil]); if(j!==ultimoJson){ ultimoJson=j; cena.onMudar(cena.estado()); } }
 }
-function resize(){ const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); if(typeof pipTam==='function') pipTam(0); }
+function resize(){ let w=innerWidth,h=innerHeight;
+  if(window.VID&&VID.on){ const q=vidQuadro(); w=q.w; h=q.h; Object.assign(cv.style,{position:'fixed',left:q.l+'px',top:q.t+'px',width:w+'px',height:h+'px'});
+    const r=document.documentElement.style; r.setProperty('--fl',q.l+'px'); r.setProperty('--fw',w+'px'); r.setProperty('--ft',q.t+'px'); r.setProperty('--fh',h+'px'); }
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); if(typeof pipTam==='function') pipTam(0); }
 // ======================= TELINHA LATERAL (picture-in-picture) =======================
 // Mostra uma vista fixa (ex.: paineis) num canto da tela, independente da camera principal. Botoes, alavancas,
 // plugues e o acelerador podem ser acionados por dentro da telinha. Arraste no vazio para girar, roda para aproximar.
@@ -5334,6 +5367,7 @@ const TECLAS=[
  {k:'H',d:'Joystick do para-choque (canhão)',b:'btnCh'},
  {g:'Tela'},
  {k:'X',d:'Explodir / montar a superestrutura',b:'btnExplode'},
+ {k:'V',d:'Visão geral (mantém o modo Ir ligado)',ac:'-'},
  {k:'I',d:'Modo instrução',ac:'-'},
  {k:'Shift',d:'Modo Ir',ac:'-'},
  {k:'?',d:'Mostrar / esconder estes controles',ac:'-'}];
@@ -5351,6 +5385,7 @@ window.addEventListener('keydown',e=>{
   if(k==='PageUp'||k==='PageDown'){ e.preventDefault(); S.acel=Math.max(0,Math.min(1,S.acel+(k==='PageUp'?0.25:-0.25))); tecMostra('Acelerador '+Math.round(S.acel*100)+' %'); return; }
   if(k==='Home'||k==='End'){ e.preventDefault(); S.acel=k==='End'?1:0; tecMostra('Acelerador '+Math.round(S.acel*100)+' %'); return; }
   if(e.repeat) return;
+  if(kl==='v'){ e.preventDefault(); const ir=ZOOM.ir; vista('conj'); if(ir&&!ZOOM.ir) setIr(true); tecMostra('Visão geral'+(ZOOM.ir?' · modo Ir ligado':'')); return; }
   const t=TMAP[kl]; if(!t) return; const el=$(t.b); if(!el) return; e.preventDefault(); el.click(); setTimeout(()=>tecMostra(tecRotulo(t.b)||t.d),60);
 });
 window.addEventListener('keyup',e=>{ const k=e.key;
@@ -5752,6 +5787,132 @@ function mostraErro(onde,err){ const k=onde+':'+(err&&err.message); if(ERROS.vis
   box.textContent+=(box.textContent?'\n\n':'')+'Erro em '+onde+': '+(err&&err.message)+'\n'+pilha; }
 function seguro(onde,f){ try{ f(); }catch(e){ mostraErro(onde,e); } }
 window.addEventListener('error',ev=>mostraErro('evento',ev.error||{message:ev.message,stack:(ev.filename||'')+':'+ev.lineno}));
+// ======================= MODO APRESENTACAO (video 16:9 para YouTube) =======================
+// Abra index.html?video (ou roda -> Ferramentas -> Modo apresentação). A cena ocupa um quadro 16:9 (tela cheia em monitor 16:9). Clique (ou Espaco) para iniciar; Espaco pausa/continua o roteiro; Esc sai.
+// Texto final: ?video&fim=Seu%20texto&fim2=Subtitulo
+(function(){ const VID=window.VID; if(!VID) return;
+  const P=new URLSearchParams(location.search);
+  VID.fim=P.get('fim')||'SIMULADOR CCI · TRIEL-HT'; VID.fim2=P.get('fim2')||'Treinamento de operação de viaturas de combate a incêndio';
+  VID.esperas=[]; VID.t=0; VID.alvoP=0; VID.orb=0; VID.cur=null;
+  const $v=id=>document.getElementById(id);
+  // ---------- tick (chamado pelo loop principal) ----------
+  VID.tick=dt=>{ if(!VID.on) return;
+    if((S.pBomba||0)>13.2) S.acel=Math.max(0,S.acel-dt*2.5);                          // seguranca: nunca chegar perto dos 15 bar da junta
+    else if(VID.alvoP>0&&S.pto){ S.acel=Math.max(0,Math.min(1,S.acel+Math.max(-0.5,Math.min(0.5,(VID.alvoP-(S.pBomba||0))*0.08))*dt)); }
+    else if(VID.alvoP===0&&S.acel>0&&VID.rodando) S.acel=Math.max(0,S.acel-dt*0.5);
+    if(FOGO.on&&FOGO.hit) FOGO.f=Math.max(0,FOGO.f-dt*0.09);                       // apresentacao: fogo apaga mais rapido
+    if(VID.orb&&!VT&&!CAMI.cam){ const t=controls.target, p=camera.position, a=VID.orb*dt, x=p.x-t.x, z=p.z-t.z; p.x=t.x+x*Math.cos(a)-z*Math.sin(a); p.z=t.z+x*Math.sin(a)+z*Math.cos(a); }
+    if(VID.cur){ const c=VID.cur; c.k=Math.min(1,c.k+dt/c.d); const e=c.k*c.k*(3-2*c.k), x=c.x0+(c.x1-c.x0)*e, y=c.y0+(c.y1-c.y0)*e; VID.cx=x; VID.cy=y;
+      const el=$v('vidCur'); el.style.left=x+'px'; el.style.top=y+'px'; const r=$v('roda'); if(r&&r.classList.contains('on')) r.dispatchEvent(new PointerEvent('pointermove',{clientX:x,clientY:y,bubbles:true}));
+      if(c.k>=1){ VID.cur=null; } }
+    if(VID.pausa) return; VID.t+=dt;
+    for(const e of VID.esperas.slice()){ e.t-=dt; let ok=false; try{ ok=!!(e.f&&e.f()); }catch(x){} if(ok||e.t<=0){ VID.esperas.splice(VID.esperas.indexOf(e),1); e.r(ok); } } };
+  const esp=s=>new Promise(r=>VID.esperas.push({t:s,r}));
+  // antes de fechar uma expedicao: volta o motor a marcha lenta e espera a rotacao cair (evita o pico que rompe a junta)
+  async function alivia(){ VID.alvoP=-1; S.acel=0; await ate(()=>(S.pBomba||0)<6,3); await esp(0.4); }
+  const ate=(f,max)=>new Promise(r=>VID.esperas.push({t:max||10,f,r}));
+  // ---------- camera ----------
+  function cam(nome,dur,zoom){ const v=VISTAS[nome]; if(!v) return; const t=V(...v.t), p=V(...v.p).sub(t).multiplyScalar(zoom||VID.zoom).add(t);
+    VID.orb=0; CAMI.cam=null; VT={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,k:0,d:dur||2.2}; }
+  // ---------- textos ----------
+  function cap(html){ const el=$v('vidCap'); el.classList.remove('on'); clearTimeout(cap._t); if(!html) return; cap._t=setTimeout(()=>{ el.innerHTML=html; el.classList.add('on'); },html&&el.textContent?280:0); }
+  function etq(t){ const el=$v('vidTag'); if(!t){ el.classList.remove('on'); return; } el.textContent=t; el.classList.add('on'); }
+  function tit(a,b){ const el=$v('vidTit'); if(!a){ el.classList.remove('on'); return; } el.innerHTML='<b>'+a+'</b>'+(b?'<span>'+b+'</span>':''); el.classList.add('on'); }
+  function fade(on){ $v('vidFade').classList.toggle('on',!!on); return esp(0.6); }
+  function marca(id){ if(!VID.box) VID.box=insCaixa(0x3ddc84); insMostraCaixa(VID.box,id?FF(id):null); }
+  const clica=id=>{ const b=$v(id); if(b) b.click(); };
+  // ---------- cursor e roda ----------
+  function cursor(x,y,d){ const el=$v('vidCur'); el.classList.add('on'); VID.cur={x0:VID.cx??x,y0:VID.cy??(y+120),x1:x,y1:y,k:0,d:d||0.55}; return ate(()=>!VID.cur,(d||0.55)+0.5); }
+  function fatia(k){ const sv=document.querySelector('#roda svg'), r=sv.getBoundingClientRect(), n=document.querySelectorAll('#roda .fat').length||1, a=k*2*Math.PI/n, rm=201.5*r.width/600;
+    return [r.left+r.width/2+rm*Math.sin(a), r.top+r.height/2-rm*Math.cos(a)]; }
+  async function aponta(k,d){ const [x,y]=fatia(k); await cursor(x,y,d); }
+  function clique(){ const el=$v('vidCur'); el.classList.add('cl'); setTimeout(()=>el.classList.remove('cl'),220); $v('roda').dispatchEvent(new MouseEvent('click',{bubbles:true})); }
+  // ---------- roteiro ----------
+  async function roteiro(){ VID.rodando=true; const L0=PQS.lados[0];
+    // 1. abertura
+    cam('caminhao',0.01,VID.zoomCam); VID.orb=0.13; tit('SIMULADOR CCI','Triel-HT · Scania P420 4x4'); await fade(false); await esp(3.5);
+    cap('Treinamento interativo em 3D'); await esp(5.5); tit(null);
+    // 2. explosao
+    cap('Abra a viatura e veja <b>cada componente</b> do sistema de combate a incêndio'); explodeCaminhao(); await ate(()=>CAMI.t>=0.999,8);
+    cam('conj',2.2); await esp(2.4); VID.orb=0.08; await esp(4);
+    // 3. passeio pelos componentes
+    cap('Tanque, válvulas, bomba, PTO e comandos — <b>como na viatura real</b>');
+    for(const [id,nome] of [['tanque','Tanque de água · 6100 L'],['val','Válvula tanque-bomba'],['bomba','Bomba de incêndio e PTO'],['pai','Painel de comando central'],['sol','Painéis de solenoides']]){
+      const f=FF(id); cam(f&&f.vista||id,1.8); marca(id); etq(nome); await esp(4); }
+    marca(null); etq(null);
+    // 4. menu em roda
+    cam('conj',2); cap('<b>Menu em roda</b>: qualquer comando em dois cliques'); await esp(1.5);
+    RODA.abre(); await esp(0.5); for(const k of [0,1,2,3,4]){ await aponta(k,0.45); await esp(0.45); }
+    await aponta(1,0.4); await esp(0.5); clique(); await esp(0.7);                                     // Agua
+    await aponta(0,0.5); await esp(0.6); clique(); await esp(0.4); $v('vidCur').classList.remove('on'); // valvula tanque-bomba -> cartao
+    await esp(3.2); clica('ccX'); await esp(0.4);
+    // 5. partida
+    cap('Opere como na viatura: <b>motor, chave geral, PTO e acelerador</b>'); cam('cab',1.8); await esp(2);
+    clica('btnComp'); etq('Motor ligado — compressor enchendo o ar'); await ate(()=>S.pReg>3,6); await esp(1);
+    cam('pai',1.6); await esp(1.7); clica('btnGeral'); etq('Chave geral'); await esp(1.2); clica('btnTB'); etq('TANQUE / BOMBA'); await esp(1.2);
+    cam('val',1.6); etq('A válvula tanque-bomba abre'); await ate(()=>S.ang>85,5); await esp(1);
+    cam('cab',1.6); await esp(1.6); clica('btnPTO'); etq('PTO engatado'); await esp(1.2); VID.alvoP=10;
+    cap('Som, pressão e vazão <b>em tempo real</b>'); etq('Acelerando até 10 bar'); await esp(3.5); etq(null); cam('conj',2.2); await esp(4);
+    // 6. canhao de teto
+    cap('<b>Canhão de teto</b> com jato realista e joystick'); clica('btnJoy'); cam('vcan',1.6); await esp(2.5); cam('jato',2.4); await esp(8);
+    // 7. espuma
+    cap('Geração de <b>espuma</b> pelo ADA, com dosagem de LGE'); cam('ada',1.8); clica('btnLGE'); await esp(4); cam('jato',2.2); await esp(8);
+    clica('btnLGE'); await esp(0.5);
+    // 8. outras expedicoes
+    await alivia(); clica('btnJoy'); cap('Para-choque, <b>linhas de mangueira</b> e dispersador');
+    cam('pcj',1.6); await esp(1.6); clica('btnPC'); await esp(0.8); clica('btnCh'); VID.alvoP=10; cam('par',2); etq('Canhão de para-choque'); await esp(5.5); await alivia(); clica('btnCh'); clica('btnPC');
+    mgArremessa(0); cam('mg',1.8); etq('Mangueira lateral 2½"'); await ate(()=>MG.est[0]==='ok',6); MG.abAlvo[0]=1; VID.alvoP=9; await esp(4.5); await alivia(); MG.abAlvo[0]=0;
+    clica('btnDsp'); VID.alvoP=8; cam('dsp',1.8); etq('Dispersador'); await esp(5); await alivia(); clica('btnDsp'); etq(null);
+    // 9. succao de manancial
+    cap('<b>Sucção de manancial</b> com escorva'); clica('btnTB'); S.suc=true; cam('man',2); await esp(3);
+    cam('esc',1.8); etq('A escorva retira o ar do mangote'); await esp(4.5);
+    await fade(true); S.hMan=SUC4.Htot; S.cheia=true; S.escRun=false; await esp(0.3); cam('man',0.01); etq('Bomba succionando do manancial'); await fade(false);
+    clica('btnJoy'); VID.alvoP=9; await esp(6); await alivia(); clica('btnJoy'); S.suc=false; etq(null); await esp(1);
+    // 10. panes
+    cap('<b>Panes realistas</b> — resolva com as próprias mãos'); document.body.classList.add('vidAlr');
+    try{ panEncerrar(true); const f=FPS('bob1'); Object.assign(PANE,{missao:PMISS.find(m=>m.id==='can'),falha:f,t:0,okT:0,dica:0,tent:0,fim:null,rev:false,reparada:false}); f.on(); }catch(e){ console.warn(e); }   // pane fixa: bobina do solenoide 1
+    setModo('corte'); cam('corte',0.01); await esp(1); clica('btnTB'); etq('Pane: a bobina não energiza — a válvula não abre'); await esp(4.5);
+    cam('sol',1.8); etq('Contorno: botão manual azul do solenoide'); await esp(2.2); const ov=$v('ckOv'); if(ov&&!ov.checked){ ov.checked=true; ov.dispatchEvent(new Event('change')); }
+    await esp(1); setModo('normal'); cam('val',1.4); etq('Válvula aberta pelo comando manual'); await ate(()=>S.ang>85,4); await esp(2.5);
+    document.body.classList.remove('vidAlr'); etq(null);
+    // 11. fogo
+    if(JUN.rompida) trocaJunta(); cap('Missões com <b>fogo animado</b>'); fogoAcende(); cam('fogo',2.4,VID.zoomFogo); await esp(1.5); VID.alvoP=11; clica('btnJoy');
+    await ate(()=>!FOGO.on,14); etq(FOGO.on?null:'Fogo extinto!'); await esp(2.5); await alivia(); clica('btnJoy'); etq(null);
+    try{ panEncerrar(true); }catch(e){} if(ov&&ov.checked){ ov.checked=false; ov.dispatchEvent(new Event('change')); } clica('btnTB');
+    VID.alvoP=0; await esp(0.5); clica('btnPTO');
+    // 12. PQS
+    cap('<b>Pó Químico Seco</b>: pressurização, disparo e limpeza'); cam('pqsN2',2.2); await esp(2.3);
+    pqsSet('n2Ab',true); etq('Abre o nitrogênio'); await esp(1.2); pqsSet('presAb',true); etq('Pressurizando o tanque de pó'); cam('pqs',2); await ate(()=>PQS.pT>=9.5,7);
+    etq('Puxa a mangueira do carretel'); pqsPuxa(L0); await ate(()=>L0.ext>0.99,6); pqsValvula(L0,'po'); cam('pqsJato',2); await esp(1.2);
+    etq('Disparo de pó'); pqsGatilho(L0,true); await esp(6); pqsGatilho(L0,false); pqsValvula(L0,'po');
+    etq('Limpeza da linha com N₂'); pqsValvula(L0,'limp'); pqsGatilho(L0,true); await esp(4); pqsGatilho(L0,false); pqsValvula(L0,'limp'); etq(null);
+    // 13. instrucao, roteiros, esquema 2D
+    cap('Fichas de instrução, <b>roteiros guiados</b> e esquema 2D'); cam('bomba',1.8); marca('bomba'); await esp(1); insFicha(FF('bomba')); await esp(4);
+    insFicha(null); marca(null); rotIniciar(0); await esp(4); INS.rot=null; rotDesenha();
+    abreEsquema(); await esp(1.5);
+    try{ const d=$v('esqFrame').contentWindow.document; d.getElementById('completo').click(); await esp(0.8); const aj=d.getElementById('ajusta'); aj&&aj.click(); await esp(0.4); d.getElementById('play').click(); }catch(e){ console.warn('esquema',e); }
+    await esp(6); fechaEsquema(); cap(null);
+    // 14. encerramento
+    explodeCaminhao(); await ate(()=>CAMI.t<=0.001,8); cam('caminhao',1.8,VID.zoomCam); await esp(1.9); VID.orb=0.13;
+    tit(VID.fim,VID.fim2); await esp(5); await fade(true); VID.orb=0; await esp(0.6);
+    $v('vidFim').innerHTML='<b>'+VID.fim+'</b><span>'+VID.fim2+'</span><i>Esc para sair</i>'; $v('vidFim').classList.add('on'); tit(null);
+    VID.rodando=false; }
+  // ---------- montagem da interface ----------
+  function monta(){ document.body.classList.add('video');
+    const ui=document.createElement('div'); ui.id='vidUI';
+    ui.innerHTML='<div id="vidTit"></div><div id="vidTag"></div><div id="vidCap"></div><div id="vidFade" class="on"></div><div id="vidFim"></div><div id="vidCur"></div>'+
+      '<div id="vidIni"><b>Modo apresentação</b><span id="vidIniS">Carregando o caminhão…</span><small>Grave a tela inteira (16:9).<br>Espaço pausa · Esc sai</small></div><div id="vidPausa">❚❚ pausado</div>';
+    document.body.appendChild(ui); resize();
+    $v('vidIni').onclick=inicia; }
+  function inicia(){ if(VID.ini||!(CAMI.SYS&&CAMI.g.visible)) return; VID.ini=true; try{ bipAudio(); }catch(e){} $v('vidIni').style.display='none'; roteiro().catch(e=>console.error('apresentacao',e)); }
+  VID.monta=monta; VID.inicia=inicia;
+  window.addEventListener('keydown',e=>{ if(!VID.on) return;
+    if(e.key==='Escape'){ e.preventDefault(); e.stopImmediatePropagation(); location.href=location.pathname; return; }
+    if(e.key===' '){ e.preventDefault(); e.stopImmediatePropagation(); if(!VID.ini) inicia(); else { VID.pausa=!VID.pausa; $v('vidPausa').classList.toggle('on',VID.pausa); } return; }
+    if(VID.ini){ e.stopImmediatePropagation(); e.preventDefault(); } },true);              // as demais teclas nao interferem na apresentacao
+  if(VID.on){ monta(); const pr=setInterval(()=>{ if(CAMI.SYS&&CAMI.g.visible){ clearInterval(pr); camera.fov=VID.fov; camera.updateProjectionMatrix(); cam('caminhao',0.01,VID.zoomCam);
+      $v('vidIniS').textContent='Pronto. Comece a gravar e clique aqui (ou Espaço).'; $v('vidIni').classList.add('ok'); } },300); }
+})();
 (function loop(t){
   requestAnimationFrame(loop);
   const dt=Math.min((t-t0)/1000,0.1); t0=t;
@@ -5775,7 +5936,8 @@ window.addEventListener('error',ev=>mostraErro('evento',ev.error||{message:ev.me
   puff(puffL3A,hA3.leak>0,hA3.leak/6,dts); puff(puffL3B,hB3.leak>0,hB3.leak/6,dts); puff(puffP3A,!portHose3('A')&&S.pA3>0.3,S.pA3/6,dts); puff(puffP3B,!portHose3('B')&&S.pB3>0.3,S.pB3/6,dts); animaVenturi(dts,S.ptoRot>0.05?qAg:0);
   const pEB2=(S.st2===1&&hB2.conn)?S['p'+hB2.conn+'2']:0, pEA2=(S.st2===2&&hA2.conn)?S['p'+hA2.conn+'2']:0; puff(puffEB2,pEB2>0.3,pEB2/6,dts); puff(puffEA2,pEA2>0.3,pEA2/6,dts);
   puff(puffL2A,hA2.leak>0,hA2.leak/6,dts); puff(puffL2B,hB2.leak>0,hB2.leak/6,dts); puff(puffP2A,!portHose2('A')&&S.pA2>0.3,S.pA2/6,dts); puff(puffP2B,!portHose2('B')&&S.pB2>0.3,S.pB2/6,dts);
-  if(VT){ VT.k=Math.min(1,VT.k+dt/0.7); const e=VT.k*VT.k*(3-2*VT.k); camera.position.lerpVectors(VT.p0,VT.p1,e); controls.target.lerpVectors(VT.t0,VT.t1,e); if(VT.k>=1) VT=null; }
+  if(window.VID&&VID.on&&VID.tick) VID.tick(dt);
+  if(VT){ VT.k=Math.min(1,VT.k+dt/(VT.d||0.7)); const e=VT.k*VT.k*(3-2*VT.k); camera.position.lerpVectors(VT.p0,VT.p1,e); controls.target.lerpVectors(VT.t0,VT.t1,e); if(VT.k>=1) VT=null; }
   controls.update(); renderer.render(scene,camera); renderPip();
 })(performance.now());
 </script>
