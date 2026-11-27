@@ -170,7 +170,7 @@
   <div class="linha"><button id="mNormal" class="a">Modo normal</button><button id="mCorte">Modo corte</button></div>
   <div class="linha"><button id="vConj">Vista geral</button><button id="vVal">Válvula</button><button id="vPai">Painel</button><button id="vTanque">Tanque</button><button id="vBomba">Bomba</button><button id="vCab">Cabine</button></div>
   <div class="linha"><button id="vByp">Bypass</button></div>
-  <div class="linha"><button id="vAda">ADA</button><button id="vLge">LGE</button><button id="vVlge">Válvula LGE</button><button id="vDos">Dosador LGE</button><button id="vSol">Solenoides</button></div>
+  <div class="linha"><button id="vAda">ADA</button><button id="vLge">LGE</button><button id="vVlge">Válvula LGE</button><button id="vDos">Dosador LGE</button><button id="vSol">Solenoides</button><button id="vQd">Disjuntores</button></div>
   <div class="linha"><button id="vCan">Canhão</button><button id="vVcan">Válvula canhão</button><button id="vJato">Jato</button><button id="vJunta">Junta</button></div>
   <div class="linha"><button id="vBT">Bomba-tanque</button><button id="vSucc">Sucção</button><button id="vMan">Manancial</button><button id="vEsc">Escorva</button></div>
   <div class="linha"><button id="vPcj">Painel para-choque</button><button id="vPar">Para-choque</button><button id="vVpar">Válvula para-choque</button><button id="vMg">Expedições laterais</button><button id="vVdsp">Válvula dispersador</button><button id="vDsp">Dispersador</button><button id="vAdm">Admissão do tanque</button><button id="vHid">Hidrante</button><button id="vInu">Para-brisa</button><button id="vBInu">Bomba do inundador</button><button id="vMgt">Carretel de mangotinho</button></div>
@@ -420,7 +420,7 @@
   const topo=$i('btnExplode').closest('.linha');
   // ---------- vistas: os botoes v* viram uma lista ----------
   const vb=[...P.querySelectorAll('button')].filter(b=>/^v[A-Z]/.test(b.id));
-  const NOMES_VISTA={vConj:'Vista geral',vVal:'Válvula tanque-bomba',vPai:'Painel central',vTanque:'Tanque de água',vBomba:'Bomba de incêndio / PTO',vCab:'Painel da cabine',vByp:'Bypass (regulador de pressão)',vAda:'ADA',vLge:'Tanque de LGE',vVlge:'Válvula de LGE',vDos:'Dosador de LGE',vSol:'Painel de solenoides',vCan:'Canhão de teto',vVcan:'Válvula do canhão de teto',vJato:'Jato do canhão de teto',vJunta:'Junta de expansão',vBT:'Válvula bomba-tanque',vSucc:'Sucção de manancial (válvula esférica)',vMan:'Manancial / mangote',vEsc:'Bomba de escorva',vPcj:'Painel do canhão de para-choque',vPar:'Canhão de para-choque',vVpar:'Válvula do canhão de para-choque',vMg:'Expedições laterais',vVdsp:'Válvula do dispersador',vDsp:'Dispersador',vAdm:'Admissão do tanque',vHid:'Hidrante',vInu:'Para-brisa / inundador',vBInu:'Bomba do inundador',vMgt:'Carretel de mangotinho'};
+  const NOMES_VISTA={vConj:'Vista geral',vVal:'Válvula tanque-bomba',vPai:'Painel central',vTanque:'Tanque de água',vBomba:'Bomba de incêndio / PTO',vCab:'Painel da cabine',vByp:'Bypass (regulador de pressão)',vAda:'ADA',vLge:'Tanque de LGE',vVlge:'Válvula de LGE',vDos:'Dosador de LGE',vSol:'Painel de solenoides',vQd:'Quadro de disjuntores',vCan:'Canhão de teto',vVcan:'Válvula do canhão de teto',vJato:'Jato do canhão de teto',vJunta:'Junta de expansão',vBT:'Válvula bomba-tanque',vSucc:'Sucção de manancial (válvula esférica)',vMan:'Manancial / mangote',vEsc:'Bomba de escorva',vPcj:'Painel do canhão de para-choque',vPar:'Canhão de para-choque',vVpar:'Válvula do canhão de para-choque',vMg:'Expedições laterais',vVdsp:'Válvula do dispersador',vDsp:'Dispersador',vAdm:'Admissão do tanque',vHid:'Hidrante',vInu:'Para-brisa / inundador',vBInu:'Bomba do inundador',vMgt:'Carretel de mangotinho'};
   vb.forEach(b=>{ if(NOMES_VISTA[b.id]) b.textContent=NOMES_VISTA[b.id]; });
   const ops=vb.map(b=>[b.id,b.textContent]).concat([['__pqs','Sistema de PQS'],['__pqsN2','Cilindro de N₂ (PQS)'],['__pqsJato','Jato de pó (PQS)']]).sort((x,y)=>x[1].localeCompare(y[1],'pt',{sensitivity:'base'}));
   const sel=document.createElement('select'); sel.id='vistaSel'; sel.title='Levar a câmera até…';
@@ -4336,7 +4336,7 @@ function botaoInu(b){ S.inund=!!b; return true; }
 const _iu=new THREE.Vector3();
 function animaInu(dt){
   S.inundPos+=Math.sign((S.inund?1:0)-S.inundPos)*Math.min(Math.abs((S.inund?1:0)-S.inundPos),dt/0.2);
-  const liga=(S.gPos>0.5&&!PANE.fus)&&S.inundPos>0.5, temAgua=S.nivelL>5;
+  const liga=(S.gPos>0.5&&!PANE.fus)&&S.inundPos>0.5&&(typeof DJ==='undefined'||DJ.on[DJ.INU]), temAgua=S.nivelL>5;
   INU.q+=(((liga&&temAgua)?INU.qNom:0)-INU.q)*(1-Math.exp(-dt*(liga?2:1.2))); if(INU.q<0.3&&!(liga&&temAgua)) INU.q=0; S.qInu=INU.q;
   INU.ang+=dt*(liga?60:0); INU.ventoinha.rotation.x=INU.ang;
   // limpadores: funcionam automaticamente com o inundador ligado (vai-e-volta ~1,6 s); ao desligar terminam o curso e estacionam
@@ -5344,6 +5344,104 @@ $('panMis').innerHTML=PMISS.map(m=>'<option value="'+m.id+'">'+m.nome+'</option>
 { const _enc=panEncerrar; panEncerrar=function(sil){ _enc(sil); fogoApaga(); }; $('panEnc').onclick=()=>panEncerrar(false); }
 $('panVerFogo').onclick=()=>vista(FOGO.g.visible?'fogo':'can');
 
+// ======================= QUADRO DE DISJUNTORES (a esquerda do painel de solenoides superior) =======================
+// Caixa metalica com porta (dobradicas a direita, fecho 1/4 de volta) e 8 disjuntores DIN lado a lado, todos ligados.
+// Disjuntor 7 = bomba eletrica do INUNDADOR DE PARA-BRISA: desligado (ou desarmado por sobrecarga) o inundador para.
+// Clique na porta para abrir/fechar; com a porta aberta, clique na alavanca de um disjuntor para ligar/desligar.
+const DJ={N:8, INU:6, on:[true,true,true,true,true,true,true,true], desarm:[], ang:[], porta:0, portaAlvo:0, H:0.30, W:0.26, D:0.10,
+  P:V(-1.36,0.48,-0.997), hit:[], alav:[], nomes:['Painel central','Solenoides','Compressor','Escorva','Iluminação','Giroflex','Inundador','Reserva']};
+{
+  const g=new THREE.Group(); g.position.copy(DJ.P); dress.add(g); DJ.g=g;
+  const {H,W,D}=DJ, t=0.002, ABA=0.018, cinza=std(0xb9bcb6,0.15,0.55), lar=std(0xa8301b,0.2,0.45), borr=std(0x1b1c1d,0,0.85), aco=std(0xb4b9be,0.85,0.3), preto=std(0x1a1b1c,0.1,0.5);
+  const bx=(w,h,d,m,x,y,z,par=g)=>{ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(x,y,z); par.add(o); return o; };
+  const cnv=(w,h,f)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); f(x,w,h); const tx=new THREE.CanvasTexture(c); tx.anisotropy=4; return tx; };
+  // caixa
+  bx(W,H,t,cinza,0,0,t/2); bx(t,H,D,cinza,-W/2+t/2,0,D/2); bx(t,H,D,cinza,W/2-t/2,0,D/2); bx(W,t,D,cinza,0,H/2-t/2,D/2); bx(W,t,D,cinza,0,-H/2+t/2,D/2);
+  bx(ABA,H,t,cinza,-W/2+ABA/2,0,D-t/2); bx(ABA,H,t,cinza,W/2-ABA/2,0,D-t/2); bx(W,ABA,t,cinza,0,H/2-ABA/2,D-t/2); bx(W,ABA,t,cinza,0,-H/2+ABA/2,D-t/2);
+  // placa de montagem + trilho DIN
+  const PW=W-2*ABA-0.012, PH=H-2*ABA-0.012; bx(PW,PH,0.002,lar,0,0,0.012);
+  for(const [sx,sy] of [[1,1],[1,-1],[-1,1],[-1,-1]]){ const o=new THREE.Mesh(new THREE.CylinderGeometry(0.0045,0.0045,0.004,6),aco); o.rotation.x=Math.PI/2; o.position.set(sx*(PW/2-0.012),sy*(PH/2-0.012),0.015); g.add(o); }
+  const yR=-0.01; bx(0.19,0.035,0.0015,aco,0,yR,0.0135); bx(0.19,0.005,0.0075,aco,0,yR+0.015,0.0165); bx(0.19,0.005,0.0075,aco,0,yR-0.015,0.0165);
+  // etiqueta de identificacao acima dos disjuntores
+  const passo=0.02, x0=-(DJ.N-1)*passo/2, zB=0.0205;
+  const tl=cnv(640,96,(x,w,h)=>{ x.fillStyle='#f3f3ef'; x.fillRect(0,0,w,h); x.strokeStyle='#888'; x.lineWidth=2;
+    for(let i=0;i<8;i++){ const cx=(i+0.5)*80; x.strokeRect(i*80+1,1,78,h-2); x.fillStyle=i===DJ.INU?'#c62828':'#222'; x.font='bold 40px sans-serif'; x.textAlign='center'; x.fillText(String(i+1),cx,44);
+      x.font='bold '+(i===DJ.INU?17:15)+'px sans-serif'; const n=DJ.nomes[i].toUpperCase(); x.fillText(n.length>10?n.slice(0,9)+'.':n,cx,80); } });
+  const lb=new THREE.Mesh(new THREE.PlaneGeometry(passo*8,0.024),new THREE.MeshStandardMaterial({map:tl,roughness:0.6})); lb.position.set(0,yR+0.067,0.0135); g.add(lb);
+  // disjuntores
+  const txD=cnv(200,340,(x,w,h)=>{ x.fillStyle='#dcdedf'; x.fillRect(0,0,w,h); x.fillStyle='#2b74bd'; x.fillRect(12,10,176,36); x.fillStyle='#fff'; x.font='bold 21px sans-serif'; x.textAlign='center'; x.fillText('DISJUNTOR',100,37);
+    x.fillStyle='#2a2c2e'; x.textAlign='left'; x.font='bold 30px sans-serif'; x.fillText('DIN 3kA',14,86); x.font='bold 40px sans-serif'; x.fillText('C20',14,128); x.font='bold 21px sans-serif'; x.fillText('240/415V~',14,158);
+    x.strokeStyle='#3a3d40'; x.lineWidth=2; x.strokeRect(14,172,50,24); x.font='bold 17px sans-serif'; x.textAlign='center'; x.fillText('3000',39,191); x.textAlign='left'; x.font='bold 19px sans-serif'; x.fillText('50/60Hz',74,191);
+    x.font='bold 15px sans-serif'; x.fillText('NBR NM 60898 IP20',14,222); x.lineWidth=3; x.beginPath(); x.moveTo(130,250); x.lineTo(130,318); x.stroke(); x.font='bold 20px sans-serif'; x.textAlign='center'; x.fillText('I',150,262); x.fillText('O',152,322); });
+  const plast=std(0xd3d5d6,0,0.55), plast2=std(0xbcbfc1,0,0.6), azul=std(0x2f6fc0,0,0.4), paraf=std(0xc9b86c,0.85,0.3), esc=std(0x2b2d2f,0,0.8), labM=new THREE.MeshStandardMaterial({map:txD,roughness:0.6});
+  for(let i=0;i<DJ.N;i++){ const d=new THREE.Group(); d.position.set(x0+i*passo,yR,zB); g.add(d);
+    const w=0.0196; bx(w,0.10,0.030,plast,0,0,0.015,d); bx(w,0.062,0.015,plast,0,0,0.0375,d);
+    for(const s of [1,-1]){ const o=new THREE.Mesh(new THREE.CylinderGeometry(0.0043,0.0043,0.0022,20),paraf); o.rotation.x=Math.PI/2; o.position.set(0,s*0.0405,0.0308); d.add(o);
+      const f=bx(0.0065,0.0008,0.0008,esc,0,s*0.0405,0.0321,d); f.rotation.z=Math.PI/4; const f2=bx(0.0065,0.0008,0.0008,esc,0,s*0.0405,0.0321,d); f2.rotation.z=-Math.PI/4; }
+    const et=new THREE.Mesh(new THREE.PlaneGeometry(w-0.0006,0.034),labM); et.position.set(0,0.014,0.0452); d.add(et);
+    bx(0.0158,0.026,0.0012,plast2,0,-0.0175,0.0451,d);
+    const piv=new THREE.Group(); piv.position.set(0,-0.0175,0.0452); d.add(piv);
+    bx(0.013,0.012,0.013,azul,0,0,0.0045,piv); const h=bx(0.017,0.03,0.02,new THREE.MeshBasicMaterial({visible:false}),0,-0.0175,0.05,d); h.userData.dj=i; DJ.hit.push(h);
+    DJ.alav.push(piv); DJ.ang[i]=-0.55; DJ.desarm[i]=false; }
+  // porta (eixo das dobradicas a direita)
+  const GAP=0.002, DW=W+2*GAP, DH=H+2*GAP, HX=W/2-0.004, HZ=D-0.005, dx=-HX, dz=D+0.001-HZ;
+  const pt=new THREE.Group(); pt.position.set(HX,0,HZ); g.add(pt); DJ.pt=pt;
+  const ph=[bx(DW,DH,t,cinza,dx,0,dz+t/2,pt)];
+  for(const [w,h,x,y] of [[t,DH,-DW/2,0],[t,DH,DW/2,0],[DW,t,0,DH/2],[DW,t,0,-DH/2]]) ph.push(bx(w,h,0.014,cinza,dx+x,y,dz-0.007,pt));
+  const gi=ABA*0.55, gw=DW-2*gi-0.004, gh=DH-2*gi-0.004;
+  for(const [w,h,x,y] of [[0.007,gh,-gw/2,0],[0.007,gh,gw/2,0],[gw+0.007,0.007,0,gh/2],[gw+0.007,0.007,0,-gh/2]]) bx(w,h,0.005,borr,dx+x,y,dz-0.0025,pt);
+  const FX=dx-DW/2+0.035; { const o=new THREE.Mesh(new THREE.CylinderGeometry(0.010,0.011,0.007,28),preto); o.rotation.x=Math.PI/2; o.position.set(FX,0,dz+t+0.0035); pt.add(o); ph.push(o); }
+  bx(0.0025,0.012,0.0018,aco,FX,0,dz+t+0.0075,pt); bx(0.01,0.026,0.003,aco,FX-0.003,-0.007,dz-0.016,pt);
+  for(const y of [DH/2-0.05,-DH/2+0.05]){ const o=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.004,0.035,12),aco); o.position.set(0,y,0); pt.add(o); }
+  const txA=cnv(240,214,(x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle='#141414'; x.beginPath(); x.moveTo(120,8); x.lineTo(232,206); x.lineTo(8,206); x.closePath(); x.fill();
+    x.fillStyle='#ffdd00'; x.beginPath(); x.moveTo(120,24); x.lineTo(218,198); x.lineTo(22,198); x.closePath(); x.fill();
+    x.fillStyle='#141414'; x.beginPath(); [[128,60],[106,108],[122,108],[108,146],[100,146],[112,168],[126,146],[118,146],[136,104],[120,104],[138,60]].forEach((p,k)=>k?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1])); x.closePath(); x.fill();
+    x.font='bold 15px sans-serif'; x.textAlign='center'; x.fillText('RISCO DE CHOQUE',120,178); x.fillText('ELÉTRICO',120,194); });
+  const ad=new THREE.Mesh(new THREE.PlaneGeometry(0.075,0.067),new THREE.MeshStandardMaterial({map:txA,transparent:true,roughness:0.4})); ad.position.set(dx,0.03,dz+t+0.0004); pt.add(ad);
+  const txQ=cnv(256,48,(x,w,h)=>{ x.fillStyle='#f3f3ef'; x.fillRect(0,0,w,h); x.fillStyle='#222'; x.font='bold 24px sans-serif'; x.textAlign='center'; x.fillText('QUADRO DE DISJUNTORES',w/2,32); });
+  const qt=new THREE.Mesh(new THREE.PlaneGeometry(0.12,0.0225),new THREE.MeshStandardMaterial({map:txQ,roughness:0.6})); qt.position.set(dx,-0.07,dz+t+0.0004); pt.add(qt);
+  ph.forEach(m=>{ m.userData.djPorta=true; DJ.hit.push(m); });
+}
+function djSet(i,on){ DJ.on[i]=on; if(on) DJ.desarm[i]=false; bip(0.04); }
+function djDesarma(i){ DJ.on[i]=false; DJ.desarm[i]=true; }
+function animaDJ(dt){
+  DJ.porta+=Math.sign(DJ.portaAlvo-DJ.porta)*Math.min(Math.abs(DJ.portaAlvo-DJ.porta),dt/0.6); const e=DJ.porta*DJ.porta*(3-2*DJ.porta);
+  DJ.pt.rotation.y=e*100*Math.PI/180;
+  for(let i=0;i<DJ.N;i++){ const alvo=DJ.on[i]?-0.55:0.55; DJ.ang[i]+=Math.sign(alvo-DJ.ang[i])*Math.min(Math.abs(alvo-DJ.ang[i]),dt*12); DJ.alav[i].rotation.x=DJ.ang[i]; } }
+function djPick(){ if(INS.on||ZOOM.ir) return null; ray.setFromCamera(ndc,CAMR||camera); const h=ray.intersectObjects(DJ.hit,false)[0]; if(!h) return null;
+  if(h.object.userData.djPorta) return 'porta'; return DJ.porta>0.85?h.object.userData.dj:null; }
+cv.addEventListener('pointerdown',e=>{ setNdc(e); const k=djPick(); if(k===null||k===undefined) return; e.stopImmediatePropagation(); e.preventDefault();
+  if(k==='porta'){ DJ.portaAlvo=DJ.portaAlvo>0.5?0:1; return; }
+  djSet(k,!DJ.on[k]); if(k===DJ.INU) alrEvento('dj7',DJ.on[k]?'Disjuntor 7 (inundador) ligado.':'Disjuntor 7 (inundador) desligado: a bomba do inundador para.','info',3); },true);
+cv.addEventListener('pointermove',()=>{ const k=djPick(); if(k!==null&&k!==undefined) cv.style.cursor='pointer'; });
+VISTAS.qd={p:[DJ.P.x+0.25,DJ.P.y+0.18,DJ.P.z+0.75],t:[DJ.P.x,DJ.P.y,DJ.P.z+0.05]};
+if($('vQd')) $('vQd').onclick=()=>vista('qd');
+FICHAS.push({id:'qd',nome:'Quadro de disjuntores',c:[DJ.P.x,DJ.P.y,DJ.P.z+0.05],h:[0.135,0.155,0.06],vista:'qd',
+  oque:'Caixa metálica com 8 disjuntores DIN (C20), ao lado do painel de solenoides superior.',
+  sis:'Cada disjuntor protege um circuito 24 V. O disjuntor 7 alimenta a bomba elétrica do inundador de para-brisa.',
+  op:'Clique na porta para abrir. Alavanca para cima = ligado; para baixo = desligado ou desarmado por sobrecarga. Para religar, levante a alavanca.',
+  dados:'Disjuntores monopolares curva C, 20 A, 3 kA, em trilho DIN 35 mm.'});
+// ---- pane e missao do inundador ----
+PFALHAS.push({id:'djInu',tipo:'Elétrica',nome:'Disjuntor do inundador desarmado (sobrecarga)',on:()=>djDesarma(DJ.INU),off:()=>{ DJ.on[DJ.INU]=true; DJ.desarm[DJ.INU]=false; },
+  resolvido:()=>DJ.on[DJ.INU],
+  dicas:['A chave geral e a chave INUND. PARABRISA estão ligadas, mas a bomba do inundador não gira (LED apagado).','Sem energia só nesse circuito: confira o quadro de disjuntores ao lado do painel de solenoides superior.'],
+  exp:'O disjuntor 7 (inundador) desarmou por sobrecarga e ficou com a alavanca para baixo. Solução: abra a porta do quadro de disjuntores e religue o disjuntor 7 (alavanca para cima).'});
+PMISS.splice(PMISS.length-1,0,{id:'inu',nome:'Usar o inundador de para-brisa',ok:()=>(S.qInu||0)>30});
+COMPAT.inu=['djInu','fus'];
+// ---- modo aleatorio: missao sorteada (entre as que tem panes compativeis) e pane sorteada entre as compativeis ----
+const PAN_RAND='__rand';
+function panOpcoesMis(){ const v=$('panMis').value; $('panMis').innerHTML='<option value="'+PAN_RAND+'">🎲 Aleatória (missão e pane sorteadas)</option>'+PMISS.map(m=>'<option value="'+m.id+'">'+m.nome+'</option>').join(''); if(v) $('panMis').value=v; }
+const _panListaFal0=panListaFal;
+panListaFal=function(){ if($('panMis').value===PAN_RAND){ $('panFal').innerHTML='<option value="">Sorteada junto com a missão (escondida)</option>'; $('panFal').disabled=true; return; } $('panFal').disabled=false; _panListaFal0(); };
+$('panMis').onchange=panListaFal;
+{ const _ini=panIniciar; panIniciar=function(){ if($('panMis').value!==PAN_RAND) return _ini();
+    const cand=PMISS.filter(m=>COMPAT[m.id]&&COMPAT[m.id].length), m=cand[Math.floor(Math.random()*cand.length)];
+    $('panMis').value=m.id; _panListaFal0(); $('panFal').value='';                  // pane aleatoria entre as compativeis com a missao sorteada
+    try{ _ini(); } finally { $('panMis').value=PAN_RAND; panListaFal(); }
+    if(PANE.missao) PANE.sorteada=true; panTxt(); alrEvento('panSort','🎲 Missão sorteada: '+PANE.missao.nome,'info',5); };
+  $('panIni').onclick=()=>panIniciar(); }
+panOpcoesMis(); panListaFal();
+
 // ======================= TECLADO E CARTAO "CONTROLES" =======================
 // Atalhos acionam os mesmos botoes do menu (mesma logica). Botao "Controles" (ou tecla ?) mostra a lista.
 const TECLAS=[
@@ -5927,7 +6025,7 @@ window.addEventListener('error',ev=>mostraErro('evento',ev.error||{message:ev.me
   puff(puffEB,pEB>0.3,pEB/6,dts); puff(puffEA,pEA>0.3,pEA/6,dts);
   puff(puffLA,hA.leak>0,hA.leak/6,dts); puff(puffLB,hB.leak>0,hB.leak/6,dts);
   puff(puffPA,!portHose('A')&&S.pA>0.3,S.pA/6,dts); puff(puffPB,!portHose('B')&&S.pB>0.3,S.pB/6,dts);
-  animaFios(dts); seguro('setas',()=>animaSetas(dts)); seguro('mangueiras',()=>animaMang(dts)); seguro('dispersador',()=>animaDsp(dts)); seguro('admissao',()=>animaAdm(dts)); seguro('transbordo',()=>animaTransb(dts)); seguro('inundador',()=>animaInu(dts)); seguro('mangotinho',()=>animaMgt(dts)); seguro('zoom',()=>animaZoom(dt)); seguro('caminhao',()=>animaCaminhao(dt)); seguro('instrucao',()=>animaInstr(dt)); seguro('motor',()=>animaMotor(dt)); seguro('mangSolenoide',()=>animaSolMang(dt)); seguro('manancialEspuma',()=>animaManEsp(dt)); seguro('panes',()=>animaPanes(dt)); seguro('panes2',()=>animaPanes2(dt)); seguro('fogo',()=>animaFogo(dt)); seguro('teclas',()=>animaTeclas(dt)); seguro('sons',()=>animaSons(dt)); seguro('pqs',()=>animaPQS(dt)); seguro('alertas',()=>animaAlertas(dt)); animaLGEfluxo(dts,S.lgeFlux); animaExpBypass(dts); animaCanhao(dts); animaPara(dts); animaBT(dts); animaVazamento(dts);
+  animaFios(dts); seguro('setas',()=>animaSetas(dts)); seguro('mangueiras',()=>animaMang(dts)); seguro('dispersador',()=>animaDsp(dts)); seguro('admissao',()=>animaAdm(dts)); seguro('transbordo',()=>animaTransb(dts)); seguro('inundador',()=>animaInu(dts)); seguro('mangotinho',()=>animaMgt(dts)); seguro('zoom',()=>animaZoom(dt)); seguro('caminhao',()=>animaCaminhao(dt)); seguro('instrucao',()=>animaInstr(dt)); seguro('motor',()=>animaMotor(dt)); seguro('mangSolenoide',()=>animaSolMang(dt)); seguro('manancialEspuma',()=>animaManEsp(dt)); seguro('panes',()=>animaPanes(dt)); seguro('panes2',()=>animaPanes2(dt)); seguro('fogo',()=>animaFogo(dt)); seguro('teclas',()=>animaTeclas(dt)); seguro('sons',()=>animaSons(dt)); seguro('disjuntores',()=>animaDJ(dts)); seguro('pqs',()=>animaPQS(dt)); seguro('alertas',()=>animaAlertas(dt)); animaLGEfluxo(dts,S.lgeFlux); animaExpBypass(dts); animaCanhao(dts); animaPara(dts); animaBT(dts); animaVazamento(dts);
   const pEB5=(S.st5===1&&hB5.conn)?S['p'+hB5.conn+'5']:0, pEA5=(S.st5===2&&hA5.conn)?S['p'+hA5.conn+'5']:0; puff(puffEB5,pEB5>0.3,pEB5/6,dts); puff(puffEA5,pEA5>0.3,pEA5/6,dts);
   puff(puffL5A,hA5.leak>0,hA5.leak/6,dts); puff(puffL5B,hB5.leak>0,hB5.leak/6,dts); puff(puffP5A,!portHose5('A')&&S.pA5>0.3,S.pA5/6,dts); puff(puffP5B,!portHose5('B')&&S.pB5>0.3,S.pB5/6,dts);
   const pEB4=(S.st4===1&&hB4.conn)?S['p'+hB4.conn+'4']:0, pEA4=(S.st4===2&&hA4.conn)?S['p'+hA4.conn+'4']:0; puff(puffEB4,pEB4>0.3,pEB4/6,dts); puff(puffEA4,pEA4>0.3,pEA4/6,dts);

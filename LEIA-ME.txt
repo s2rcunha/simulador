@@ -882,3 +882,23 @@ MENU LATERAL REORGANIZADO
 - Modo Ir agora na tecla Shift (sozinha, alterna ao soltar; Shift+outra tecla não aciona). O Alt deixou de ser usado.
 
 - Tecla X: explodir / montar a superestrutura (aparece em Controles e na roda → Ferramentas).
+
+- Modo apresentação (vídeo vertical 9:16 para story): abra index.html?video ou roda → Ferramentas → Modo
+  apresentação. A cena fica num quadro vertical no centro da tela; clique (ou Espaço) para iniciar, Espaço pausa,
+  Esc sai. Roteiro automático de ~3 min 30 s (abertura, explosão, componentes, menu em roda, partida, canhão de
+  teto, espuma, expedições, sucção, panes, fogo, PQS, instrução/roteiros/esquema 2D, encerramento).
+  Texto final: ?video&fim=Seu%20texto&fim2=Subtítulo. Ajustes de enquadramento em window.VID (zoom, fov).
+
+- Modo apresentação passou para 16:9 (YouTube): ocupa a tela inteira em monitor 16:9 (faixas pretas em outros
+  formatos); câmeras nas vistas originais; legenda embaixo à esquerda, etiqueta no canto superior, fichas/cartões à direita.
+
+- Apresentação: o acelerador agora nunca passa de ~13 bar e volta à marcha lenta antes de fechar cada expedição
+  (antes o pico de pressão ao fechar rompia a junta de expansão e o canhão ficava sem água no fogo). Pane da cena
+  de panes fixada (bobina do solenoide 1); se a junta estiver rompida ela é trocada antes da cena do fogo.
+
+- Tecla V: volta para a vista geral mantendo o modo Ir ligado (se estiver ligado).
+
+- Quadro de disjuntores à esquerda do painel de solenoides superior: caixa com porta (clique para abrir/fechar)
+  e 8 disjuntores DIN ligados; o disjuntor 7 alimenta a bomba do inundador de para-brisa (desligado = inundador para).
+  Nova missão "Usar o inundador de para-brisa" com a pane "Disjuntor do inundador desarmado (sobrecarga)": religar o 7.
+  Panes: opção "🎲 Aleatória" sorteia a missão e uma pane compatível (escondida).
